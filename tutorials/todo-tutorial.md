@@ -11,9 +11,9 @@
 
 ## 前置
 
-- 已跑过 `install-windows.ps1`：4 MCP、ruflo、25 个 tunan-* skill 都到位
-- 仓库根有 `.tunan-workspace/`（6 池 + worktrees + retro；模板随 skill 分发到 `.claude/skills/tunan-<pool>/template.md`）
-- `gh auth status` 显示已登录
+- 在仓库根跑 `./check-windows.ps1`（Windows）或 `./check.sh`（macOS/Linux）输出 **All checks passed**
+  - 校验内容：前置 CLI、3 MCP、25 个 tunan-* skill、`.tunan-workspace/{worktrees,retro,raw-reqs,sprints/<current>/reqs}` + `settings.md`、`USER.md`、`tutorials/`、`gh` 已登录
+  - 任一红色 `[ERROR]` 都先解决再继续
 - 当前 git user 即是 sponsor 的 owner 名
 
 随时迷路 → `/tunan-prime` 拉回现状。
@@ -110,7 +110,7 @@ sponsor> 全部默认
 ```
 
 预期：
-- 写入 `.tunan-workspace/req/REQ-002-todo-app.md`，`status: ready`
+- 写入 `.tunan-workspace/sprints/SPT-001/reqs/REQ-002-todo-app/REQ-002-todo-app.md`，`status: ready`（sprint 由 `settings.md.current_sprint` 决定）
 - 结束播报：推荐 `/tunan-prd REQ-002` / `/tunan-cp` / `/tunan-prime`
 
 ### 步骤 1b · （可选）从 issue 生成 REQ
@@ -139,7 +139,7 @@ sponsor> /tunan-prd REQ-002
 sponsor> 全部默认
 ```
 
-预期：写入 `prd/PRD-002-todo-app.md`，status=ready；推荐 `/tunan-story PRD-002`。
+预期：写入 `<REQ-dir>/PRD-002-todo-app/PRD-002-todo-app.md`，status=ready；推荐 `/tunan-story PRD-002`。
 
 ### 步骤 3 · PRD → STORY 拆分
 
@@ -163,7 +163,7 @@ sponsor> /tunan-story PRD-002
 sponsor> 全部默认
 ```
 
-预期：5 个 `story/STORY-NNN-*.md` 落盘，`source_id: PRD-002`，依赖图：
+预期：5 个 `<PRD-dir>/STORY-NNN-*/STORY-NNN-*.md` 落盘，`source_id: PRD-002`，依赖图：
 - 002 blocked_by 001
 - 003 blocked_by 001
 - 004 blocked_by 002
@@ -201,7 +201,7 @@ sponsor> /tunan-plan STORY-001
 sponsor> 全部默认
 ```
 
-落盘 `plan/PLAN-001-add-todo.md`。
+落盘 `<STORY-dir>/PLAN-001-add-todo.md`。
 
 > 重复 `/tunan-plan` for STORY-002..005 或 `/tunan-parallel-pick` 取并行项。
 
@@ -220,7 +220,7 @@ sponsor> /tunan-testplan PLAN-001
 sponsor> 全部默认
 ```
 
-落盘 `testplan/TESTPLAN-001-add-todo.md`。
+落盘 `<STORY-dir>/TESTPLAN-001-add-todo.md`。
 
 ### 步骤 6 · TESTPLAN → worktree dev
 
@@ -235,7 +235,7 @@ sponsor> /tunan-dev TESTPLAN-001
   - 先写 TESTPLAN 中的失败测试 → 跑 → 红
   - sponsor 显式放行才写产品代码 → 绿
 - 完成后 `git push` 起 PR：`gh pr create --base dev`
-- 落盘 `pr/PR-001-add-todo.md`，`gh_pr: <num>`，`status: reviewing`
+- 落盘 `<STORY-dir>/PR-001-add-todo.md`，`gh_pr: <num>`，`status: reviewing`
 
 ### 步骤 7 · PR 自驱动循环
 
@@ -326,7 +326,7 @@ sponsor> /tunan-req --from-issue 2
 sponsor> 全部默认
 ```
 
-落盘 `req/REQ-003-new-todo-not-shown.md`，`kind: bug`，`status: ready`。
+落盘 `sprints/SPT-001/reqs/REQ-003-new-todo-not-shown/REQ-003-new-todo-not-shown.md`，`kind: bug`，`status: ready`。
 
 ### 步骤 10b · bug 先诊断再修
 
@@ -404,16 +404,20 @@ sponsor> /tunan-improve-arch --from-retros
 ## 教程产物清单（应在 .tunan-workspace/ 中看到的）
 
 ```
-req/
-  REQ-002-todo-app.md             (done)
-  REQ-003-new-todo-not-shown.md   (done, kind:bug)
-prd/
-  PRD-002-...md                   (done)
-  PRD-003-...md                   (done)
-story/
-  STORY-001..005-...md            (done)
-  STORY-006-...md                 (done, bug)
-plan/  testplan/  pr/             (全 done)
+settings.md                                                # current_sprint: SPT-001
+sprints/SPT-001/reqs/
+  REQ-002-todo-app/
+    REQ-002-todo-app.md                                    (done)
+    PRD-002-.../
+      PRD-002-...md                                        (done)
+      STORY-001..005-.../
+        STORY-NNN-*.md / PLAN-NNN-*.md / TESTPLAN-NNN-*.md / PR-NNN-*.md (全 done)
+  REQ-003-new-todo-not-shown/                              (kind:bug)
+    REQ-003-new-todo-not-shown.md                          (done)
+    PRD-003-.../
+      PRD-003-...md                                        (done)
+      STORY-006-.../                                       (done, bug)
+        STORY-006-*.md / PLAN/TESTPLAN/PR-*.md
 retro/
   2026-MM-DD-new-todo-not-shown.md
 ```

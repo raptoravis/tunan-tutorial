@@ -63,7 +63,8 @@ adversarial:   ...（畸形输入 / 截止后再投 / 并发提交）
 
 ### 5. 落盘
 
-`<STORY-dir>/<TESTPLAN-id>-<STORY-slug>.md`，`source_id: PLAN-NNN`，`status: ready`
+<!-- MIRROR of tunan-prime §池结构；改前先改源 -->
+`<STORY-dir>/<TESTPLAN-id>-<STORY-slug>.md`，其中 `<STORY-dir>` = `.tunan-workspace/sprints/SPT-*/reqs/REQ-*/PRD-*/STORY-*`；`source_id: PLAN-NNN`，`status: ready`
 
 > 与同 STORY 的 PLAN/PR 共享目录；slug 沿用 STORY slug。
 
@@ -77,7 +78,7 @@ adversarial:   ...（畸形输入 / 截止后再投 / 并发提交）
 ## 接下来做什么
 
 ```
-✅ TESTPLAN-NNN 已写入 testplan/，status=ready
+✅ TESTPLAN-NNN 已写入 <STORY-dir>/TESTPLAN-NNN-<STORY-slug>.md，status=ready
 
 推荐下一步：
   1. ★ /tunan-dev TESTPLAN-NNN  — 创建 worktree 开始开发（入口会统一 commit+push PLAN/TESTPLAN 到 base，见 tunan-dev §2.5）

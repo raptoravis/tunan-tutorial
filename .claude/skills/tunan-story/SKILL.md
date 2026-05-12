@@ -17,7 +17,8 @@ description: tunan 工作流第三站：把 PRD 拆为 1..N 个 STORY（用户�
 
 **开关**：
 - `--target-count=<n>` — 目标 STORY 数（默认让 claude 自由判断 + 经 align 确认）
-- `--id-base=<STORY-NNN>` — 起始 id
+<!-- MIRROR of tunan-prime §池结构；改前先改源 -->
+- `--id-base=<STORY-NNN>` — 起始 id（默认 = 跨所有 sprint 的下一序号，glob `.tunan-workspace/sprints/SPT-*/reqs/REQ-*/PRD-*/STORY-*/`）
 
 ## 拆分原则（必须遵守）
 
@@ -46,7 +47,8 @@ description: tunan 工作流第三站：把 PRD 拆为 1..N 个 STORY（用户�
 
 ### 4. 落盘（每条一个文件）
 
-`.tunan-workspace/<REQ-dir>/<PRD-dir>/<STORY-id>-<slug>/<STORY-id>-<slug>.md`，套本 skill 同目录 `template.md`：
+<!-- MIRROR of tunan-prime §池结构；改前先改源 -->
+`<REQ-dir>/<PRD-dir>/<STORY-id>-<slug>/<STORY-id>-<slug>.md`（`<REQ-dir>` 通过 PRD frontmatter `source_id` Glob 反查到 `.tunan-workspace/sprints/SPT-*/reqs/<REQ-id>-*/`），套本 skill 同目录 `template.md`：
 （`<REQ-dir>` 和 `<PRD-dir>` 通过 PRD frontmatter 的 source_id 反查；STORY 自己有独立目录方便后续 PLAN/TESTPLAN/PR 同居）
 - frontmatter `source_id: PRD-xxx`、`priority`、`estimate`、`blocked_by`
 - 正文必含 As-a / I-want / So-that + Given-When-Then AC + Dependencies
@@ -66,7 +68,7 @@ description: tunan 工作流第三站：把 PRD 拆为 1..N 个 STORY（用户�
 ## 接下来做什么
 
 ```
-✅ 拆出 5 个 STORY 入 story 池：STORY-007..STORY-011
+✅ 拆出 5 个 STORY 写入 <PRD-dir>/STORY-007..011-*/：STORY-007..STORY-011
 
 推荐下一步：
   1. ★ /tunan-plan STORY-007  — 从依赖图根节点起 PLAN

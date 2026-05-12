@@ -40,6 +40,7 @@ description: tunan bug 诊断。把 bug 现象转为可复现的失败测试，�
 
 ### 5. 出诊断报告
 
+<!-- MIRROR of tunan-prime §池结构；改前先改源 -->
 `.tunan-workspace/retro/<date>-diag-<REQ-id>.md`（与 retro 同目录便于查找）：
 
 ```

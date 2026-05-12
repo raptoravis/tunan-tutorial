@@ -70,7 +70,8 @@ git pull --ff-only
 
 ### 5. 失败回流
 任一档失败：
-- 在 `.tunan-workspace/<REQ-NEW-id>-<slug>/<REQ-NEW-id>-<slug>.md` 新建顶层 REQ 目录与文件（与原 REQ 平行）：
+<!-- MIRROR of tunan-prime §池结构；改前先改源 -->
+- 读 `.tunan-workspace/settings.md` 的 `current_sprint`；在 `.tunan-workspace/sprints/<current_sprint>/reqs/<REQ-NEW-id>-<slug>/<REQ-NEW-id>-<slug>.md` 新建 REQ 目录与文件（**写入当前 sprint**，可能与原 REQ 所在 sprint 不同）：
   - `kind: bug`
   - `source_id: REQ-原`（链回原需求）
   - `title: 回归 — <一句话失败现象>`

@@ -20,7 +20,8 @@ description: tunan 工作流第二站：把 REQ 池中的需求展开为 PRD（�
 
 **开关**：
 - `--from=<REQ-id>` — 同 `<REQ-id>` 位置参数
-- `--id=<PRD-id>` — 显式 id（默认 `PRD-` + 池下一序号）
+<!-- MIRROR of tunan-prime §池结构；改前先改源 -->
+- `--id=<PRD-id>` — 显式 id（默认 `PRD-` + 跨所有 sprint 的下一序号，glob `.tunan-workspace/sprints/SPT-*/reqs/REQ-*/PRD-*/`）
 
 ## 流程（开始时播报"将依次走 1) prime 检查 → 2) 弹 REQ → 3) 起草 PRD → 4) 对齐 → 5) 入池"）
 
@@ -28,7 +29,8 @@ description: tunan 工作流第二站：把 REQ 池中的需求展开为 PRD（�
 - 调 `tunan-prime` 协议（轻量版）：列当前用户在 PRD 池中是否已有 in_progress 项；若有，提示先收尾或 takeover
 
 ### 2. 弹 REQ（pop-next 规则，G-002）
-- 筛 `req/*.md` 中 `status==ready && blocked_by==[] && (owner==当前 user 或 --any-owner)`
+<!-- MIRROR of tunan-prime §池结构；改前先改源 -->
+- 跨所有 sprint 筛 `.tunan-workspace/sprints/SPT-*/reqs/REQ-*/REQ-*.md` 中 `status==ready && blocked_by==[] && (owner==当前 user 或 --any-owner)`
 - 按 `priority` 升序、`created` 升序选第一个
 - 把该 REQ 的 `status: ready → in_progress`（updated 改今天）
 
@@ -57,8 +59,9 @@ description: tunan 工作流第二站：把 REQ 池中的需求展开为 PRD（�
 
 ### 5. 入池
 
-- 写 `.tunan-workspace/<REQ-dir>/<PRD-id>-<slug>/<PRD-id>-<slug>.md`
-  - `<REQ-dir>` 用 `Glob .tunan-workspace/<source-REQ-id>-*` 解析（每个 REQ 顶层目录唯一）
+<!-- MIRROR of tunan-prime §池结构；改前先改源 -->
+- 写 `<REQ-dir>/<PRD-id>-<slug>/<PRD-id>-<slug>.md`
+  - `<REQ-dir>` 用 `Glob .tunan-workspace/sprints/SPT-*/reqs/<source-REQ-id>-*` 解析（REQ id 跨 sprint 唯一；落在某个 sprint 下）
   - PRD 自己的目录与 md 文件 slug 来自 PRD 标题（不必复制 REQ slug）
 - frontmatter `source_id: REQ-NNN`，`status: ready`
 - 同步把 REQ 中的 `Decisions` 表追加（来源 = `accept all` / `显式 X`）
@@ -79,7 +82,7 @@ description: tunan 工作流第二站：把 REQ 池中的需求展开为 PRD（�
 ## 接下来做什么（结束时播报）
 
 ```
-✅ PRD-NNN 已写入 prd/，status=ready（源 REQ-NNN 已置 in_progress）
+✅ PRD-NNN 已写入 <REQ-dir>/PRD-NNN-<slug>/，status=ready（源 REQ-NNN 已置 in_progress）
 
 推荐下一步：
   1. ★ /tunan-story PRD-NNN  — 拆 STORY

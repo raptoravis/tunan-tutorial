@@ -53,7 +53,8 @@ gh pr merge <num> --merge --delete-branch
 
 ### 2.5. Pull 前主仓 PLAN/TESTPLAN 副本核对
 
-tunan-plan / tunan-testplan 把 PLAN/TESTPLAN 文件写在**主仓库** `.tunan-workspace/<STORY-dir>/` 下供
+<!-- MIRROR of tunan-prime §池结构；改前先改源 -->
+tunan-plan / tunan-testplan 把 PLAN/TESTPLAN 文件写在**主仓库** `.tunan-workspace/sprints/SPT-*/reqs/<REQ-dir>/<PRD-dir>/<STORY-dir>/` 下供
 tunan-prime 索引；tunan-dev 又把它们复制进 worktree 并随 PR 提交。当 PR 合回 master 后，主仓库内：
 
 - 当时 plan/testplan 落盘的 `PLAN-NNN-*.md` / `TESTPLAN-NNN-*.md` 仍是 **untracked** 副本
@@ -74,6 +75,7 @@ tunan-prime 索引；tunan-dev 又把它们复制进 worktree 并随 PR 提交�
 
 ### 3. 本地清理
 
+<!-- MIRROR of tunan-prime §池结构；改前先改源 -->
 ```
 git -C .tunan-workspace/worktrees/<STORY-id>-<owner> status   # 检查无未提交改动
 git worktree remove .tunan-workspace/worktrees/<STORY-id>-<owner>

@@ -24,6 +24,8 @@ description: tunan 显式接管池条目。把某 id 的 owner 改为当前 git 
 
 ### 1. 读条目
 - 找 `<id>` 在哪个池
+<!-- MIRROR of tunan-prime §池结构；改前先改源 -->
+- 使用 tunan-prime 的 6 类 Glob 跨所有 sprint 查找 `<id>`，不要回退到旧的扁平池目录。
 - 读 frontmatter `owner` / `status` / `transfer_log`（如有）
 
 ### 2. 防止误接管
@@ -57,7 +59,8 @@ description: tunan 显式接管池条目。把某 id 的 owner 改为当前 git 
 - 分支命名含旧 owner → 提示 sponsor：
   - ★ 默认 重命名分支：`tunan/dev/STORY-007-alice` → `tunan/dev/STORY-007-jonli`（`git branch -m`）
   - 备选 不改（保留可追溯性）
-- worktree 路径 `worktrees/STORY-007-alice` → `worktrees/STORY-007-jonli`（`git worktree move`）
+<!-- MIRROR of tunan-prime §池结构；改前先改源 -->
+- worktree 路径 `.tunan-workspace/worktrees/STORY-007-alice` → `.tunan-workspace/worktrees/STORY-007-jonli`（`git worktree move`）
 
 ### 5. 通知（可选）
 - 若条目对应 GitHub PR：在 PR 评论"@alice → @jonli takeover, reason: ..."

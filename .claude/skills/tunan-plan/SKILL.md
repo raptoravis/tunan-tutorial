@@ -82,7 +82,8 @@ description: tunan 工作流第四站：把 STORY 转成可执行的实现 PLAN�
 
 `<STORY-dir>/<PLAN-id>-<STORY-slug>.md`，`source_id: STORY-NNN`，`status: ready`
 
-> `<STORY-dir>` 即源 STORY 所在目录（通过 STORY id Glob 反查：`.tunan-workspace/**/<STORY-id>-*/`）。
+<!-- MIRROR of tunan-prime §池结构；改前先改源 -->
+> `<STORY-dir>` 即源 STORY 所在目录（通过 STORY id Glob 反查：`.tunan-workspace/sprints/SPT-*/reqs/**/<STORY-id>-*/`）。
 > PLAN 文件 slug 沿用 STORY slug 保持目录内 prefix 一致；多 PLAN（如修订）走后缀 `-v2`。
 
 ## 反模式
@@ -95,7 +96,7 @@ description: tunan 工作流第四站：把 STORY 转成可执行的实现 PLAN�
 ## 接下来做什么
 
 ```
-✅ PLAN-NNN 已写入 plan/，status=ready
+✅ PLAN-NNN 已写入 <STORY-dir>/PLAN-NNN-<STORY-slug>.md，status=ready
 
 推荐下一步：
   1. ★ /tunan-testplan PLAN-NNN  — 出测试计划

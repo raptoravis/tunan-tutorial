@@ -37,6 +37,7 @@ description: tunan 全链路串联 pipeline。从 raw-req MD 文件（或 --from
 /tunan-pipeline --pre-auth                 # 预授权 TDD red-gate + PR LGTM；merge/verify 失败仍刹车
 ```
 
+<!-- MIRROR of tunan-prime §池结构；改前先改源 -->
 > **默认必须传入 raw-req MD 路径**（约定位置 `.tunan-workspace/raw-reqs/<YYYY-MM-DD>-<slug>.md`）。
 > **Why**：所有原始需求统一进 `raw-reqs/` 留痕，可追溯；同时强制 sponsor 把"一句话"展开成可被自己/他人重读的初稿，鼓励深思熟虑。
 > 既没传路径、也没显式指定 `--from-issue` / `--from-conversation` → **直接报错**，不静默 fallback 到对话抽取。

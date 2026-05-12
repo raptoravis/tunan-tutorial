@@ -64,8 +64,22 @@ description: tunan 回顾 + 自我进化。形如"issue xyz came up, what could 
 
 > 这一防线源自 REQ-001 G-005："retro 改写 skill 必须经 sponsor 复核才落盘（避免 skill 自毁）"
 
+### 4.5 工作区结构变更约束
+
+<!-- MIRROR of tunan-prime §池结构；改前先改源 -->
+若本轮 retro 的 skill 修改涉及 `.tunan-workspace/` 路径（目录、glob、写位置），**必须**：
+
+1. **先改源**：`.claude/skills/tunan-prime/SKILL.md §池结构`（SSOT）
+2. **跑 lint**：`bash .claude/scripts/lint-workspace-paths.sh`（Windows: `.ps1`），失败必修
+3. **回扫 mirror**：搜 `grep -rn "MIRROR of tunan-prime"` 把所有镜像同步到新结构
+4. **同步 install/check**：`install*.{ps1,sh}` 与 `check*.{ps1,sh}` 的目录骨架与校验项
+5. **lint 再跑一次**通过，才允许进入第 5 步落盘
+
+跳过任意一步 = 漂移风险 → sponsor 拒绝落盘。
+
 ### 5. 落盘 retro 记录
 
+<!-- MIRROR of tunan-prime §池结构；改前先改源 -->
 `.tunan-workspace/retro/<YYYY-MM-DD>-<slug>.md`：
 ```yaml
 ---

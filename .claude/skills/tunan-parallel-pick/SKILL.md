@@ -22,6 +22,8 @@ description: tunan 并行任务拣选器。从池中找出可同时进行而不�
 
 ### 1. 拉候选
 - 池中 status==ready、blocked_by==[]
+<!-- MIRROR of tunan-prime §池结构；改前先改源 -->
+- 默认 pool=story 时用 Glob `.tunan-workspace/sprints/SPT-*/reqs/REQ-*/PRD-*/STORY-*/STORY-*.md`；`--pool=plan` 用同 STORY 目录下的 `PLAN-*.md`，其他 pool 按 tunan-prime 的 6 类 Glob 映射。
 - 默认按 owner 过滤；--owner=any 关闭
 
 ### 2. 分析互斥
@@ -94,7 +96,8 @@ queue_phase 取值：`red_ready` / `red_held` / `green` / `pr_open` / `merged` /
 
 恢复逻辑（纯从已有 artifact 重建状态，无外置 state 文件）：
 
-1. Glob 所有 STORY frontmatter，找 `queue_id` 非空且 `queue_phase != verified/aborted` 的条目
+<!-- MIRROR of tunan-prime §池结构；改前先改源 -->
+1. Glob `.tunan-workspace/sprints/SPT-*/reqs/REQ-*/PRD-*/STORY-*/STORY-*.md` 中所有 STORY frontmatter，找 `queue_id` 非空且 `queue_phase != verified/aborted` 的条目
 2. 按 `queue_id` 分组（同批的归一起）；多个 queue_id 时 sponsor 选一个续做
 3. 按 `queue_phase` 决定从哪步继续：
    - `red_ready` → 跳到第 4 步（批量 red-gate 等 sponsor 答复）

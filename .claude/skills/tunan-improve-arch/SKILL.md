@@ -20,7 +20,8 @@ description: tunan 架构反思与改进提案。基于代码现状 + retro 历�
 ### 1. 收集证据
 - 近 N 个 retro 的 trigger / root-cause
 - `git log --pretty='%h %s' -- <area>` 改动热点
-- 现有 `.tunan-workspace/diagnose/` 中重复出现的根因
+<!-- MIRROR of tunan-prime §池结构；改前先改源 -->
+- `.tunan-workspace/retro/<date>-diag-*.md` 中重复出现的根因（tunan-diagnose 把诊断报告落在 retro/）
 - 若有 graphify-out/ → 用之
 
 ### 2. 识别架构性问题（不是单 bug）

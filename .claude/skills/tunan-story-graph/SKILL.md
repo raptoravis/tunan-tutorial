@@ -21,7 +21,8 @@ description: tunan STORY 依赖图渲染。读指定 PRD 下所有 STORY 的 fro
 
 ### 1. 定位 PRD 目录
 
-- Glob `.tunan-workspace/REQ-*/<PRD-id>-*/` 找到 PRD 所在目录
+<!-- MIRROR of tunan-prime §池结构；改前先改源 -->
+- Glob `.tunan-workspace/sprints/SPT-*/reqs/REQ-*/<PRD-id>-*/` 找到 PRD 所在目录
 - 读 `<PRD-id>-*.md` frontmatter 确认 `source_id` 是某个 REQ
 - 未找到 → 报错 "PRD-NNN 不存在；用 /tunan-prime 看可用 PRD 列表"
 
@@ -91,7 +92,8 @@ graph TD
 
 ## 失败处理
 
-- PRD 目录不存在 → 报错并列出 `.tunan-workspace/REQ-*/PRD-*/` 可见 PRD
+<!-- MIRROR of tunan-prime §池结构；改前先改源 -->
+- PRD 目录不存在 → 报错并列出 `.tunan-workspace/sprints/SPT-*/reqs/REQ-*/PRD-*/` 可见 PRD
 - 某 STORY frontmatter 损坏 → 标 ❓ + 错误简述，不阻塞其他
 - 检测到环依赖（A blocked_by B, B blocked_by A）→ 在图末标 ⚠ 环，列出环上的 STORY
 

@@ -37,7 +37,8 @@ PR 池 status == testing？
 ## 详细流程
 
 ### 1. 加载 PR 上下文
-- 读 PR 池条目（worktree / branch / gh_pr / source_id 链路）
+<!-- MIRROR of tunan-prime §池结构；改前先改源 -->
+- 读 PR 池条目（Glob `.tunan-workspace/sprints/SPT-*/reqs/REQ-*/PRD-*/STORY-*/PR-*.md`；包含 worktree / branch / gh_pr / source_id 链路）
 - `gh pr view <num> --json state,reviewDecision,comments,updatedAt`
 - 读上一轮 frontmatter `last_review` / `last_test` / `last_seen_comment_at`
 

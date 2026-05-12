@@ -17,6 +17,7 @@ description: tunan 工作流第一站。把 sponsor 的 raw-req MD 文件（或 
 
 **默认形态：必须传入 raw-req MD 文件路径**
 
+<!-- MIRROR of tunan-prime §池结构；改前先改源 -->
 - 约定位置：`.tunan-workspace/raw-reqs/<YYYY-MM-DD>-<slug>.md`（不存在就先建目录）
 - **Why**：所有原始需求统一进 `raw-reqs/` 留痕，可 grep / 可 git blame / 可回溯；同时强制 sponsor 把"一句话"展开成可被自己/他人重读的初稿，鼓励深思熟虑
 - skill 启动时先校验路径存在且非空；不存在 → 报错并提示 sponsor 先在 `raw-reqs/` 下落一份草稿
@@ -28,10 +29,12 @@ description: tunan 工作流第一站。把 sponsor 的 raw-req MD 文件（或 
 - `--from-issue <#>` — 从 GitHub issue 抓取标题/正文/讨论作为输入（用 `gh issue view`）；issue 正文会落档一份到 `raw-reqs/` 做留痕
 - `--no-research` — **关掉**默认的社区调研（缺省是开的）
 - `--kind=feature|bug|chore` — 指定类型；不传时由 skill 推断并向 sponsor 确认
-- `--id=<REQ-NNN>` — 显式 id（默认自动 = `REQ-` + 池中下一序号）
+<!-- MIRROR of tunan-prime §池结构；改前先改源 -->
+- `--id=<REQ-NNN>` — 显式 id（默认自动 = `REQ-` + 跨所有 sprint 的下一序号，glob `.tunan-workspace/sprints/SPT-*/reqs/REQ-*/`）
 - `--owner=<name>` — 默认 = 当前 git user
 
 **示例**：
+<!-- MIRROR of tunan-prime §池结构；改前先改源 -->
 ```
 /tunan-req .tunan-workspace/raw-reqs/2026-05-12-vote-history.md   # 标准形态
 /tunan-req --from-issue 42                                        # 从 issue #42（自动落档）
@@ -62,6 +65,7 @@ description: tunan 工作流第一站。把 sponsor 的 raw-req MD 文件（或 
 
 - 来源（按开关定）：
   - 默认：读 `<raw-req.md>` 路径指向的文件
+  <!-- MIRROR of tunan-prime §池结构；改前先改源 -->
   - `--from-issue <#>`：`gh issue view <#>`，并把正文落档到 `.tunan-workspace/raw-reqs/<YYYY-MM-DD>-issue-<#>.md`
   - `--from-conversation`：从当前会话原话抽取（frontmatter 标 `raw_req_source: conversation`）
   - 三种都没指定 → 报错并提示 sponsor 选一种；**不静默 fallback**
@@ -88,9 +92,13 @@ description: tunan 工作流第一站。把 sponsor 的 raw-req MD 文件（或 
 
 ### 5. 起草 REQ artifact（G-010 必填章节）
 
-文件路径：`.tunan-workspace/<REQ-id>-<slug>/<REQ-id>-<slug>.md`（新建 REQ 目录后落 md；REQ-id 与 slug 既作目录名也作文件名）
+<!-- MIRROR of tunan-prime §池结构；改前先改源 -->
+先读 `.tunan-workspace/settings.md` 的 frontmatter 拿到 `current_sprint`（如 `SPT-001`）；缺失则报错让 sponsor 先建 settings.md，不脑补。
 
-> 池结构按 REQ→PRD→STORY 嵌套；REQ 是顶层目录，PRD/STORY 后续往 REQ 目录内嵌。详见 tunan-prime "池结构" 节。
+<!-- MIRROR of tunan-prime §池结构；改前先改源 -->
+文件路径：`.tunan-workspace/sprints/<current_sprint>/reqs/<REQ-id>-<slug>/<REQ-id>-<slug>.md`（新建 REQ 目录后落 md；REQ-id 与 slug 既作目录名也作文件名）
+
+> 池结构按 sprint→REQ→PRD→STORY 嵌套；REQ 落在当前 sprint 的 `reqs/` 下，PRD/STORY 后续往 REQ 目录内嵌。详见 tunan-prime "池结构" 节。
 
 frontmatter（G-002 schema）：
 ```yaml
@@ -166,8 +174,9 @@ sponsor 可：
 
 skill 完成时**必须**输出一段，例：
 
+<!-- MIRROR of tunan-prime §池结构；改前先改源 -->
 ```
-✅ REQ-007 已写入 .tunan-workspace/REQ-007-add-vote-history/REQ-007-add-vote-history.md (status: ready)
+✅ REQ-007 已写入 .tunan-workspace/sprints/SPT-001/reqs/REQ-007-add-vote-history/REQ-007-add-vote-history.md (status: ready, sprint: SPT-001)
 
 接下来做什么（按推荐顺序）：
   1. ★ /tunan-prd REQ-007       — 把 REQ 展开成 PRD（默认下一步）

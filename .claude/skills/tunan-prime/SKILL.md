@@ -27,33 +27,61 @@ description: tunan 现状回拉武器（关键防漂移）。在长会话、多�
 
 - 找 `.tunan-workspace/`（项目根 → 父目录两层内）
 - 没找到 → 报错并提示 `bash install-windows.ps1` 或手动建池目录；不脑补不创建
+- 读 `.tunan-workspace/settings.md` 的 frontmatter，抽 `current_sprint`（如 `SPT-001`）；缺失则报错让用户先建 settings.md
+- 报告头部输出 `current sprint: SPT-NNN`
 
-### 池结构（嵌套，REQ→PRD→STORY，自 2026-05-11 重构）
+### 池结构（嵌套，sprint→REQ→PRD→STORY，自 2026-05-12 重构）
+
+> **本节是 `.tunan-workspace/` 路径的唯一来源（SSOT）。**
+> 其他 skill 中出现的具体 glob / 写路径都是本节的**镜像**。任何结构变更都必须：
+> 1. 先改本节；
+> 2. 跑 `.claude/scripts/lint-workspace-paths.sh`（或 `.ps1`）核对所有镜像；
+> 3. 修复镜像直到 lint 通过；
+> 4. 同步改 `install*` 与 `check*` 脚本。
+>
+> 镜像持有者（grep `MIRROR of tunan-prime §池结构` 可定位精确锚点）：
+> `tunan-req` / `tunan-prd` / `tunan-story` / `tunan-story-graph` / `tunan-plan` /
+> `tunan-dev` / `tunan-merge` / `tunan-verify` / `tunan-improve-arch`
 
 ```
 .tunan-workspace/
-  <REQ-id>-<slug>/                                   # REQ 顶层目录
-    <REQ-id>-<slug>.md                               # REQ 本体
-    <PRD-id>-<slug>/                                 # 该 REQ 下每个 PRD 一个目录
-      <PRD-id>-<slug>.md
-      <STORY-id>-<slug>/                             # 该 PRD 下每个 STORY 一个目录
-        <STORY-id>-<slug>.md
-        <PLAN-id>-<STORY-slug>.md                    # 文件名 slug 沿用 STORY slug
-        <TESTPLAN-id>-<STORY-slug>.md
-        <PR-id>-<STORY-slug>.md                      # 多 PR：PR-NNN-<STORY-slug>-v2.md
+  settings.md                                        # 全局配置（含 current_sprint）
+  raw-reqs/                                          # sponsor raw-req MD inbox（tunan-req 默认输入）
+  sprints/                                           # 所有 sprint
+    SPT-NNN/                                         # 单个 sprint
+      reqs/                                          # 该 sprint 下的 REQ 嵌套树
+        <REQ-id>-<slug>/                             # REQ 顶层目录
+          <REQ-id>-<slug>.md                         # REQ 本体
+          <PRD-id>-<slug>/                           # 该 REQ 下每个 PRD 一个目录
+            <PRD-id>-<slug>.md
+            <STORY-id>-<slug>/                       # 该 PRD 下每个 STORY 一个目录
+              <STORY-id>-<slug>.md
+              <PLAN-id>-<STORY-slug>.md              # 文件名 slug 沿用 STORY slug
+              <TESTPLAN-id>-<STORY-slug>.md
+              <PR-id>-<STORY-slug>.md                # 多 PR：PR-NNN-<STORY-slug>-v2.md
   retro/                                             # 扁平不变
     <YYYY-MM-DD>-<slug>.md
   worktrees/                                         # 扁平不变（gitignored）
     <STORY-id>-<owner>/
 ```
 
-Glob 模式（其他 skill 引用本节）：
-- 所有 REQ：`.tunan-workspace/REQ-*/REQ-*.md`（top-level）
-- 所有 PRD：`.tunan-workspace/REQ-*/PRD-*/PRD-*.md`
-- 所有 STORY：`.tunan-workspace/REQ-*/PRD-*/STORY-*/STORY-*.md`
-- 所有 PLAN：`.tunan-workspace/REQ-*/PRD-*/STORY-*/PLAN-*.md`
-- 所有 TESTPLAN：`.tunan-workspace/REQ-*/PRD-*/STORY-*/TESTPLAN-*.md`
-- 所有 PR：`.tunan-workspace/REQ-*/PRD-*/STORY-*/PR-*.md`
+**settings.md** 用 YAML frontmatter 定义当前 sprint：
+
+```yaml
+---
+current_sprint: SPT-001
+---
+```
+
+切换 sprint：sponsor 手动把 `current_sprint` 改成下一个 SPT-NNN，并在 `sprints/` 下新建该目录与 `reqs/` 子目录。tunan-req / tunan-verify 新建 REQ 时只写当前 sprint。
+
+Glob 模式（其他 skill 引用本节，**跨所有 sprint** 读）：
+- 所有 REQ：`.tunan-workspace/sprints/SPT-*/reqs/REQ-*/REQ-*.md`
+- 所有 PRD：`.tunan-workspace/sprints/SPT-*/reqs/REQ-*/PRD-*/PRD-*.md`
+- 所有 STORY：`.tunan-workspace/sprints/SPT-*/reqs/REQ-*/PRD-*/STORY-*/STORY-*.md`
+- 所有 PLAN：`.tunan-workspace/sprints/SPT-*/reqs/REQ-*/PRD-*/STORY-*/PLAN-*.md`
+- 所有 TESTPLAN：`.tunan-workspace/sprints/SPT-*/reqs/REQ-*/PRD-*/STORY-*/TESTPLAN-*.md`
+- 所有 PR：`.tunan-workspace/sprints/SPT-*/reqs/REQ-*/PRD-*/STORY-*/PR-*.md`
 
 ### 2. 读 6 池
 
@@ -93,7 +121,7 @@ Glob 模式（其他 skill 引用本节）：
 
 ### 4. 读 PR 池详情
 
-对所有 PR md 条目（按 Glob 模式 `.tunan-workspace/REQ-*/PRD-*/STORY-*/PR-*.md`）：
+对所有 PR md 条目（按 Glob 模式 `.tunan-workspace/sprints/SPT-*/reqs/REQ-*/PRD-*/STORY-*/PR-*.md`）：
 - 读 frontmatter `gh_pr` 字段
 - 用 `gh pr view <num> --json state,reviewDecision,comments,updatedAt` 拉 PR 真实状态
 - 标出 sponsor 是否已 approve / 是否有未消费评论
@@ -109,7 +137,7 @@ Glob 模式（其他 skill 引用本节）：
 多 session / 多 agent 协作时，另一方可能在你不知情时改了池或代码。本节主动检测：
 
 - `git log --oneline -10` — 列最近 10 commit；如果有比"你上次 prime 时记得的 HEAD"更新的，标 `⚠ 自上次 prime 后有 N 个新 commit`
-- `find .tunan-workspace/REQ-*/ -name '*.md' -newer ~/.claude/.tunan-last-prime-mark 2>/dev/null`（mark 文件由本步在结束时 `touch` 更新）— 列出新改的池条目
+- `find .tunan-workspace/sprints/SPT-*/reqs/REQ-*/ -name '*.md' -newer ~/.claude/.tunan-last-prime-mark 2>/dev/null`（mark 文件由本步在结束时 `touch` 更新）— 列出新改的池条目
 - 输出形如：
   ```
   ⚠ 自上次 prime 后变化：

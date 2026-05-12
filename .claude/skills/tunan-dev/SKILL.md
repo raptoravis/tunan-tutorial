@@ -40,7 +40,8 @@ description: tunan 工作流第六站（开发执行）：从 TESTPLAN 池弹出
 步骤（在主仓库根目录执行）：
 
 ```bash
-git add .tunan-workspace/<STORY-dir>/PLAN-*.md .tunan-workspace/<STORY-dir>/TESTPLAN-*.md
+# MIRROR of tunan-prime §池结构；改前先改源
+git add <STORY-dir>/PLAN-*.md <STORY-dir>/TESTPLAN-*.md     # <STORY-dir> = .tunan-workspace/sprints/SPT-*/reqs/REQ-*/PRD-*/STORY-*/
 git status --short      # 确认没夹带无关改动；夹带则停下问 sponsor
 git commit -m "<STORY-id> 链路落盘：plan + testplan"
 git push origin <base>
@@ -57,6 +58,7 @@ PR 在改自己的设计文档。前置到 base 后，PR diff 只剩代码 + PR 
 
 ### 3. 创建 worktree
 
+<!-- MIRROR of tunan-prime §池结构；改前先改源 -->
 ```
 git worktree add .tunan-workspace/worktrees/<STORY-id>-<owner> -b tunan/dev/<STORY-id>-<owner> <base>
 ```
@@ -119,9 +121,10 @@ PR body 必填：
 **PR id 分配（防并行 worktree 撞库）**：从**主仓库 + 所有活跃 worktree** 的
 所有 `PR-*.md`（嵌套结构下用递归查找）联合取最大 id + 1，不能只看主仓库当前 pool：
 
+<!-- MIRROR of tunan-prime §池结构；改前先改源 -->
 ```bash
 git worktree list --porcelain | awk '/^worktree /{print $2}' | \
-  while read wt; do find "$wt/.tunan-workspace" -type f -name 'PR-*.md' 2>/dev/null; done | \
+  while read wt; do find "$wt/.tunan-workspace/sprints" -type f -path '*/reqs/REQ-*/PRD-*/STORY-*/PR-*.md' 2>/dev/null; done | \
   sed -E 's|.*/PR-0*([0-9]+)-.*|\1|' | sort -n | tail -1
 ```
 
@@ -149,6 +152,7 @@ git worktree list --porcelain | awk '/^worktree /{print $2}' | \
 
 ## 接下来做什么
 
+<!-- MIRROR of tunan-prime §池结构；改前先改源 -->
 ```
 ✅ PR-NNN 已起：gh#<num>，worktree=.tunan-workspace/worktrees/<STORY-id>-<owner>
 
