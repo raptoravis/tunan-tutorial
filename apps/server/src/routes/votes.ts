@@ -1,8 +1,53 @@
 import { Hono } from 'hono';
 import { db } from '../db.js';
 import { newVoteId, newAdminToken } from '../ids.js';
+import { ensureSession } from '../sessions.js';
 
 export const votesRouter = new Hono();
+
+type VoteRow = { id: string; title: string; closed_at: string | null };
+type OptionRow = { idx: number; label: string };
+type CountRow = { option_idx: number; n: number };
+type SessionRow = { option_idx: number };
+
+votesRouter.get('/:id', (c) => {
+  const id = c.req.param('id');
+  const voteRow = db
+    .prepare('SELECT id, title, closed_at FROM votes WHERE id = ?')
+    .get(id) as VoteRow | undefined;
+  if (!voteRow) return c.json({ error: 'not_found' }, 404);
+
+  const session = ensureSession(c);
+
+  const optionRows = db
+    .prepare('SELECT idx, label FROM vote_options WHERE vote_id = ? ORDER BY idx')
+    .all(id) as OptionRow[];
+  const counts = db
+    .prepare(
+      'SELECT option_idx, COUNT(*) as n FROM vote_sessions WHERE vote_id = ? GROUP BY option_idx',
+    )
+    .all(id) as CountRow[];
+  const countByIdx = new Map<number, number>();
+  for (const c of counts) countByIdx.set(c.option_idx, c.n);
+
+  const youRow = db
+    .prepare(
+      'SELECT option_idx FROM vote_sessions WHERE vote_id = ? AND session_token = ?',
+    )
+    .get(id, session) as SessionRow | undefined;
+
+  return c.json({
+    id: voteRow.id,
+    title: voteRow.title,
+    closed: voteRow.closed_at !== null,
+    you_voted_idx: youRow?.option_idx ?? null,
+    options: optionRows.map((o) => ({
+      idx: o.idx,
+      label: o.label,
+      count: countByIdx.get(o.idx) ?? 0,
+    })),
+  });
+});
 
 type CreateBody = { title?: unknown; options?: unknown };
 

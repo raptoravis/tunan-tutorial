@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { CreateVote } from './CreateVote.js';
+import { VotePage } from './VotePage.js';
 
 function useHashRoute(): string {
   const [hash, setHash] = useState<string>(window.location.hash || '#/');
@@ -9,18 +10,6 @@ function useHashRoute(): string {
     return () => window.removeEventListener('hashchange', onChange);
   }, []);
   return hash;
-}
-
-function VotePagePlaceholder({ voteId }: { voteId: string }) {
-  return (
-    <section>
-      <h2>投票 {voteId}</h2>
-      <p style={{ color: '#666' }}>（投票页将在 STORY-003 实现）</p>
-      <p>
-        <a href="#/">← 回到首页</a>
-      </p>
-    </section>
-  );
 }
 
 export function App() {
@@ -34,7 +23,7 @@ export function App() {
           Voting App
         </a>
       </h1>
-      {voteMatch ? <VotePagePlaceholder voteId={voteMatch[1]} /> : <CreateVote />}
+      {voteMatch ? <VotePage voteId={voteMatch[1]} /> : <CreateVote />}
     </main>
   );
 }
