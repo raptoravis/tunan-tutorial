@@ -3,10 +3,19 @@ id: PR-001
 title: "STORY-001: MVP 单选投票端到端"
 owner: raptoravis
 source_id: TESTPLAN-001
-status: reviewing
+status: sponsor_wait
 created: 2026-05-13
 updated: 2026-05-13
 priority: P2
+last_review: pass
+last_review_at: 2026-05-13T02:05:00Z
+last_review_notes: "0 MUST / 0 SHOULD / 3 NIT"
+last_test: pass
+last_test_at: 2026-05-13T02:06:00Z
+last_test_summary: "smoke 5/5 + unit 9/9 + integration 11/11 = 25/25 pass"
+sponsor_approved: true
+sponsor_approved_at: 2026-05-13T00:00:00Z
+sponsor_approved_by: pre-auth(raptoravis)
 gh_pr: 1
 gh_url: https://github.com/raptoravis/tunan-tutorial/pull/1
 branch: tunan/dev/STORY-001-raptoravis
