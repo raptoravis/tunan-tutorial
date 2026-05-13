@@ -1,0 +1,6 @@
+node_modules/
+dist/
+*.log
+apps/server/data/*.db
+apps/server/data/*.db-*
+.tunan-workspace/worktrees/
