@@ -2,9 +2,14 @@
 id: PR-001
 title: STORY-001 创建投票（含 monorepo 脚手架）
 owner: raptoravis
-status: reviewing
+status: sponsor_wait
 created: 2026-05-13
 updated: 2026-05-13
+last_review: pass
+last_review_at: 2026-05-13T07:49:45Z
+last_test: pass
+last_test_at: 2026-05-13T07:51:00Z
+last_test_summary: smoke 3/3 + persona 14/14 + regression N/A
 source_id: TESTPLAN-001
 gh_pr: 18
 branch: tunan/dev/STORY-001-raptoravis-v2
