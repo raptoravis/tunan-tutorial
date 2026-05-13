@@ -8,7 +8,7 @@ updated: 2026-05-13
 source_id: PRD-001
 priority: P1
 estimate: M
-blocked_by: [STORY-001]
+blocked_by: []
 ---
 
 # STORY-002 — 参与投票（多选 + 修改）

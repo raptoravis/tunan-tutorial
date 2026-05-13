@@ -2,7 +2,7 @@
 id: STORY-001
 title: 发起人能创建投票房间并拿到分享链接
 owner: raptoravis
-status: ready
+status: done
 created: 2026-05-13
 updated: 2026-05-13
 source_id: PRD-001

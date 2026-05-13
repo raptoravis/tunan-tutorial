@@ -2,7 +2,7 @@
 id: TESTPLAN-001
 title: 创建投票房间 — 测试计划
 owner: raptoravis
-status: implemented
+status: done
 created: 2026-05-13
 updated: 2026-05-13
 source_id: PLAN-001
