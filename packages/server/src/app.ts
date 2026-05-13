@@ -3,6 +3,7 @@ import type { DB } from "./db.js";
 import { genShortCode } from "./shortcode.js";
 import { normalizeOptions, ValidationError } from "./options.js";
 import { aggregateResults, type OptionRow } from "./results.js";
+import { parseVotedCookie, serializeVotedCookie } from "./cookie.js";
 
 interface CreateBody {
   title?: unknown;
@@ -137,6 +138,11 @@ export function createApp(db: DB) {
       return c.json(bad("optionIds"), 400);
     }
 
+    const votedCodes = parseVotedCookie(c.req.header("cookie"));
+    if (votedCodes.includes(code)) {
+      return c.json({ error: "already_voted" }, 409);
+    }
+
     const placeholders = optionIds.map(() => "?").join(",");
     const owned = db
       .prepare(
@@ -160,6 +166,7 @@ export function createApp(db: DB) {
       .all(poll.id) as { optionId: number }[];
 
     const agg = aggregateResults(options, votes);
+    c.header("Set-Cookie", serializeVotedCookie([...votedCodes, code]));
     return c.json({
       totalVotes: agg.totalVotes,
       results: agg.results,

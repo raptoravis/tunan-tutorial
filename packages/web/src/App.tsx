@@ -61,7 +61,7 @@ export function App() {
         {route.name === "poll" && route.code && <Poll shortCode={route.code} />}
       </main>
       <footer>
-        <small>匿名投票，仅供小范围决策使用。</small>
+        <small>匿名投票，cookie 去重 — 并非强身份认证；删除 cookie 即可重投。</small>
       </footer>
     </div>
   );
