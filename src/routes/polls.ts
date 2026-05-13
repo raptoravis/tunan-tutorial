@@ -12,6 +12,12 @@ const voteSchema = z.object({
   nickname: z.string().trim().max(20).optional(),
 });
 
+const addOptionSchema = z.object({
+  label: z.string().trim().min(1).max(100),
+});
+
+const MAX_OPTIONS_PER_POLL = 30;
+
 interface PollRow {
   id: string;
   question: string;
@@ -126,11 +132,33 @@ export function pollsRoutes(db: DB) {
     return c.json({ optionId, nickname: nickname ?? null });
   });
 
+  r.post('/api/polls/:id/options', async (c) => {
+    const pollId = c.req.param('id');
+    let body: unknown;
+    try { body = await c.req.json(); } catch { return c.json({ error: 'invalid_json' }, 400); }
+    const parsed = addOptionSchema.safeParse(body);
+    if (!parsed.success) return c.json({ error: 'invalid_input' }, 400);
+
+    const poll = db
+      .prepare(`SELECT id, deadline_ms, closed_at_ms FROM polls WHERE id = ?`)
+      .get(pollId) as { id: string; deadline_ms: number; closed_at_ms: number | null } | undefined;
+    if (!poll) return c.json({ error: 'poll_not_found' }, 404);
+    if (pollIsClosed(poll, Date.now())) return c.json({ error: 'poll_closed' }, 409);
+
+    const count = db.prepare(`SELECT COUNT(*) AS c FROM options WHERE poll_id = ?`).get(pollId) as { c: number };
+    if (Number(count.c) >= MAX_OPTIONS_PER_POLL) return c.json({ error: 'options_limit' }, 409);
+
+    const id = newOptionId();
+    const now = Date.now();
+    db.prepare(`INSERT INTO options (id, poll_id, label, created_at_ms) VALUES (?, ?, ?, ?)`).run(id, pollId, parsed.data.label, now);
+    return c.json({ id, label: parsed.data.label }, 201);
+  });
+
   r.get('/api/polls/:id/results', (c) => {
     const id = c.req.param('id');
     const poll = db
-      .prepare(`SELECT id, deadline_ms, closed_at_ms FROM polls WHERE id = ?`)
-      .get(id) as { id: string; deadline_ms: number; closed_at_ms: number | null } | undefined;
+      .prepare(`SELECT id, deadline_ms, closed_at_ms, public_details FROM polls WHERE id = ?`)
+      .get(id) as { id: string; deadline_ms: number; closed_at_ms: number | null; public_details: number } | undefined;
     if (!poll) return c.json({ error: 'poll_not_found' }, 404);
 
     const rows = db
@@ -149,11 +177,29 @@ export function pollsRoutes(db: DB) {
       percent: totalVoters === 0 ? 0 : Math.round((Number(r.count) / totalVoters) * 1000) / 10,
     }));
 
-    return c.json({
+    const base: {
+      closed: boolean;
+      totalVoters: number;
+      options: typeof options;
+      voters?: Array<{ optionId: string; nickname: string }>;
+    } = {
       closed: pollIsClosed(poll, Date.now()),
       totalVoters,
       options,
-    });
+    };
+
+    if (poll.public_details) {
+      const voteRows = db
+        .prepare(`SELECT option_id, nickname FROM votes WHERE poll_id = ? ORDER BY voted_at_ms`)
+        .all(id) as unknown as Array<{ option_id: string; nickname: string | null }>;
+      let anon = 0;
+      base.voters = voteRows.map((v) => ({
+        optionId: v.option_id,
+        nickname: v.nickname && v.nickname.trim() !== '' ? v.nickname : `匿名 #${++anon}`,
+      }));
+    }
+
+    return c.json(base);
   });
 
   r.post('/api/polls/:id/close', (c) => {
@@ -174,16 +220,16 @@ export function pollsRoutes(db: DB) {
   r.get('/v/:id', (c) => {
     const id = c.req.param('id');
     const poll = db
-      .prepare(`SELECT id, question, deadline_ms, closed_at_ms FROM polls WHERE id = ?`)
-      .get(id) as { id: string; question: string; deadline_ms: number; closed_at_ms: number | null } | undefined;
+      .prepare(`SELECT id, question, deadline_ms, closed_at_ms, public_details FROM polls WHERE id = ?`)
+      .get(id) as { id: string; question: string; deadline_ms: number; closed_at_ms: number | null; public_details: number } | undefined;
     if (!poll) return c.text('Not found', 404);
     const options = db
       .prepare(`SELECT id, label FROM options WHERE poll_id = ? ORDER BY created_at_ms`)
       .all(id) as unknown as OptionRow[];
     const sid = getSid(c);
     const myVote = db
-      .prepare(`SELECT option_id FROM votes WHERE poll_id = ? AND session_id = ?`)
-      .get(id, sid) as { option_id: string } | undefined;
+      .prepare(`SELECT option_id, nickname FROM votes WHERE poll_id = ? AND session_id = ?`)
+      .get(id, sid) as { option_id: string; nickname: string | null } | undefined;
     const closed = pollIsClosed(poll, Date.now());
     return c.html(
       renderPollPage({
@@ -192,6 +238,8 @@ export function pollsRoutes(db: DB) {
         deadlineMs: poll.deadline_ms,
         options,
         mySelectedOptionId: myVote?.option_id,
+        myNickname: myVote?.nickname ?? undefined,
+        publicDetails: !!poll.public_details,
         closed,
       }),
     );
@@ -204,8 +252,8 @@ export function pollsRoutes(db: DB) {
     const q = adminQuery.safeParse({ token: c.req.query('token') });
     if (!q.success) return c.text('Missing token', 401);
     const poll = db
-      .prepare(`SELECT id, question, deadline_ms, admin_token, closed_at_ms FROM polls WHERE id = ?`)
-      .get(id) as PollRow | undefined;
+      .prepare(`SELECT id, question, deadline_ms, admin_token, closed_at_ms, public_details FROM polls WHERE id = ?`)
+      .get(id) as (PollRow & { public_details: number }) | undefined;
     if (!poll) return c.text('Not found', 404);
     if (poll.admin_token !== q.data.token) return c.text('Forbidden', 403);
     const options = db
@@ -213,8 +261,8 @@ export function pollsRoutes(db: DB) {
       .all(id) as unknown as OptionRow[];
     const sid = getSid(c);
     const myVote = db
-      .prepare(`SELECT option_id FROM votes WHERE poll_id = ? AND session_id = ?`)
-      .get(id, sid) as { option_id: string } | undefined;
+      .prepare(`SELECT option_id, nickname FROM votes WHERE poll_id = ? AND session_id = ?`)
+      .get(id, sid) as { option_id: string; nickname: string | null } | undefined;
     const closed = pollIsClosed(poll, Date.now());
     return c.html(
       renderPollPage({
@@ -224,6 +272,8 @@ export function pollsRoutes(db: DB) {
         options,
         adminToken: poll.admin_token,
         mySelectedOptionId: myVote?.option_id,
+        myNickname: myVote?.nickname ?? undefined,
+        publicDetails: !!poll.public_details,
         closed,
       }),
     );
