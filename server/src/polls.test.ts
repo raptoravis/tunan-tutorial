@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach } from 'vitest';
-import { createPoll, ValidationError } from './polls.js';
+import { createPoll, getPoll, ValidationError } from './polls.js';
 import { db } from './db.js';
 import { initSchema } from './schema.js';
 
@@ -45,5 +45,23 @@ describe('createPoll', () => {
 
   it('rejects duplicate options', () => {
     expect(() => createPoll({ title: 't', options: ['a', 'a', 'b'] })).toThrow(ValidationError);
+  });
+});
+
+describe('getPoll', () => {
+  it('returns detail with count=0 totalVotes=0 when no votes', () => {
+    const { id } = createPoll({ title: '中午吃啥', options: ['麻辣烫', '盖饭'] });
+    const poll = getPoll(id);
+    expect(poll).not.toBeNull();
+    expect(poll!.id).toBe(id);
+    expect(poll!.title).toBe('中午吃啥');
+    expect(poll!.totalVotes).toBe(0);
+    expect(poll!.options.length).toBe(2);
+    expect(poll!.options.every((o) => o.count === 0)).toBe(true);
+    expect(poll!.options[0].text).toBe('麻辣烫');
+  });
+
+  it('returns null for unknown id', () => {
+    expect(getPoll('zzzzzzzz')).toBeNull();
   });
 });

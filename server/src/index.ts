@@ -2,7 +2,7 @@ import { Hono } from 'hono';
 import { serve } from '@hono/node-server';
 import { db } from './db.js';
 import { initSchema } from './schema.js';
-import { createPoll, ValidationError } from './polls.js';
+import { createPoll, getPoll, ValidationError } from './polls.js';
 
 initSchema(db);
 
@@ -27,6 +27,12 @@ app.post('/api/polls', async (c) => {
     if (e instanceof ValidationError) return c.json({ error: e.message }, 400);
     throw e;
   }
+});
+
+app.get('/api/polls/:id', (c) => {
+  const poll = getPoll(c.req.param('id'));
+  if (!poll) return c.json({ error: 'not found' }, 404);
+  return c.json(poll);
 });
 
 if (import.meta.url === `file://${process.argv[1]?.replace(/\\/g, '/')}`) {

@@ -52,3 +52,37 @@ export function createPoll(input: CreatePollInput): { id: string } {
 
   return { id };
 }
+
+export interface PollDetail {
+  id: string;
+  title: string;
+  options: Array<{ id: string; text: string; count: number }>;
+  totalVotes: number;
+}
+
+export function getPoll(id: string): PollDetail | null {
+  const poll = db.prepare('SELECT id, title FROM polls WHERE id=?').get(id) as
+    | { id: string; title: string }
+    | undefined;
+  if (!poll) return null;
+
+  const optionRows = db
+    .prepare(
+      `SELECT o.id, o.text, COUNT(v.option_id) AS count
+         FROM options o
+         LEFT JOIN votes v ON v.option_id = o.id
+         WHERE o.poll_id = ?
+         GROUP BY o.id, o.text, o.position
+         ORDER BY o.position`,
+    )
+    .all(id) as Array<{ id: string; text: string; count: number | bigint }>;
+
+  const options = optionRows.map((o) => ({
+    id: o.id,
+    text: o.text,
+    count: Number(o.count),
+  }));
+
+  const totalVotes = options.reduce((s, o) => s + o.count, 0);
+  return { id: poll.id, title: poll.title, options, totalVotes };
+}
