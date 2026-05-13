@@ -13,5 +13,10 @@ export function openDb(file = "./data.sqlite"): DB {
   if (file !== ":memory:") db.exec("PRAGMA journal_mode = WAL");
   const schema = readFileSync(resolve(__dirname, "schema.sql"), "utf-8");
   db.exec(schema);
+  try {
+    db.exec("ALTER TABLE polls ADD COLUMN deadline_at TEXT");
+  } catch {
+    // column already exists
+  }
   return db;
 }

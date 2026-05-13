@@ -8,6 +8,7 @@ interface Props {
 export function NewPoll({ navigate }: Props) {
   const [title, setTitle] = useState("");
   const [mode, setMode] = useState<"single" | "multi">("single");
+  const [deadline, setDeadline] = useState<string>("");
   const [options, setOptions] = useState<string[]>(["", ""]);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -33,6 +34,7 @@ export function NewPoll({ navigate }: Props) {
         title: title.trim(),
         options: trimmed,
         mode,
+        deadline: deadline ? new Date(deadline).toISOString() : null,
       });
       navigate(`/p/${res.shortCode}`);
     } catch (err) {
@@ -80,6 +82,14 @@ export function NewPoll({ navigate }: Props) {
           <span>多选</span>
         </label>
       </fieldset>
+
+      <label htmlFor="deadline">截止时间（可选）</label>
+      <input
+        id="deadline"
+        type="datetime-local"
+        value={deadline}
+        onChange={(e) => setDeadline(e.target.value)}
+      />
 
       <fieldset>
         <legend>选项（至少 2 项）</legend>

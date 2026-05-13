@@ -107,7 +107,36 @@ export function Poll({ shortCode }: Props) {
 
       <h2>{poll.title}</h2>
 
-      {view === "voting" && (
+      {poll.deadlineAt &&
+        (() => {
+          const dl = new Date(poll.deadlineAt);
+          const closed = dl.getTime() <= Date.now();
+          return (
+            <p className={closed ? "error" : ""}>
+              {closed ? "已截止于 " : "截止时间："}
+              {dl.toLocaleString()}
+            </p>
+          );
+        })()}
+
+      {view === "voting" && poll.deadlineAt && new Date(poll.deadlineAt).getTime() <= Date.now() ? (
+        <div className="results" aria-live="polite">
+          <h3>结果（共 {poll.totalVotes} 票）</h3>
+          <ol>
+            {poll.results.map((r) => (
+              <li key={r.optionId}>
+                <div className="row">
+                  <span className="label">{r.label}</span>
+                  <span className="count">
+                    {r.count} ({r.percent}%)
+                  </span>
+                </div>
+                <div className="bar" style={{ width: `${r.percent}%` }} />
+              </li>
+            ))}
+          </ol>
+        </div>
+      ) : view === "voting" && (
         <form onSubmit={onSubmit}>
           <fieldset>
             <legend className="sr-only">

@@ -3,6 +3,7 @@ CREATE TABLE IF NOT EXISTS polls (
   short_code  TEXT NOT NULL UNIQUE,
   title       TEXT NOT NULL,
   mode        TEXT NOT NULL DEFAULT 'single',
+  deadline_at TEXT,
   created_at  TEXT NOT NULL DEFAULT (datetime('now'))
 );
 
