@@ -1,7 +1,7 @@
 import { Hono } from 'hono';
 import { getDb } from '../db.js';
 import { newPollId, newToken } from '../lib/id.js';
-import { OWNER_COOKIE, getCookie, setCookie } from '../lib/cookies.js';
+import { OWNER_COOKIE, VOTER_COOKIE, getCookie, setCookie, ensureVoterId } from '../lib/cookies.js';
 
 const TITLE_MAX = 100;
 const OPT_MIN = 2;
@@ -11,6 +11,10 @@ interface CreateBody {
   title?: unknown;
   options?: unknown;
   deadline_at?: unknown;
+}
+
+interface VoteBody {
+  option_id?: unknown;
 }
 
 export const pollsRoute = new Hono();
@@ -80,11 +84,63 @@ pollsRoute.get('/:id', (c) => {
   const ownerCookie = getCookie(c, OWNER_COOKIE);
   const is_owner = ownerCookie != null && ownerCookie === poll.owner_token;
 
+  const voterId = getCookie(c, VOTER_COOKIE);
+  let your_option_id: string | null = null;
+  if (voterId) {
+    const row = db
+      .prepare('SELECT option_id FROM votes WHERE poll_id = ? AND voter_id = ?')
+      .get(id, voterId) as { option_id: string } | undefined;
+    if (row) your_option_id = row.option_id;
+  }
+
+  const closed = poll.deadline_at != null && new Date(poll.deadline_at).getTime() < Date.now();
+
   return c.json({
     id: poll.id,
     title: poll.title,
     deadline_at: poll.deadline_at,
     options: options.map((o) => ({ id: o.id, label: o.label, position: o.position })),
     is_owner,
+    your_option_id,
+    closed,
   });
+});
+
+pollsRoute.post('/:id/votes', async (c) => {
+  const pollId = c.req.param('id');
+  let body: VoteBody;
+  try {
+    body = await c.req.json();
+  } catch {
+    return c.json({ error: 'invalid_json' }, 400);
+  }
+  if (typeof body.option_id !== 'string' || body.option_id.length === 0) {
+    return c.json({ error: 'option_required' }, 400);
+  }
+
+  const db = getDb();
+  const poll = db
+    .prepare('SELECT deadline_at FROM polls WHERE id = ?')
+    .get(pollId) as { deadline_at: string | null } | undefined;
+  if (!poll) return c.json({ error: 'not_found' }, 404);
+
+  if (poll.deadline_at && new Date(poll.deadline_at).getTime() < Date.now()) {
+    return c.json({ error: 'poll_closed' }, 409);
+  }
+
+  const opt = db
+    .prepare('SELECT id FROM poll_options WHERE poll_id = ? AND id = ?')
+    .get(pollId, body.option_id) as { id: string } | undefined;
+  if (!opt) return c.json({ error: 'option_not_in_poll' }, 400);
+
+  const voterId = ensureVoterId(c);
+  const now = new Date().toISOString();
+
+  db.prepare(
+    `INSERT INTO votes (poll_id, voter_id, option_id, updated_at)
+     VALUES (?, ?, ?, ?)
+     ON CONFLICT(poll_id, voter_id) DO UPDATE SET option_id = excluded.option_id, updated_at = excluded.updated_at`,
+  ).run(pollId, voterId, body.option_id, now);
+
+  return c.json({ ok: true, option_id: body.option_id });
 });

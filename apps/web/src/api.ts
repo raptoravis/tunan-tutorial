@@ -10,6 +10,8 @@ export interface Poll {
   deadline_at: string | null;
   options: PollOption[];
   is_owner: boolean;
+  your_option_id: string | null;
+  closed: boolean;
 }
 
 export interface CreatePollInput {
@@ -37,4 +39,17 @@ export async function getPoll(id: string): Promise<Poll> {
   if (res.status === 404) throw new Error('not_found');
   if (!res.ok) throw new Error(`get_failed_${res.status}`);
   return res.json();
+}
+
+export async function castVote(pollId: string, optionId: string): Promise<void> {
+  const res = await fetch(`/api/polls/${pollId}/votes`, {
+    method: 'POST',
+    headers: { 'content-type': 'application/json' },
+    credentials: 'same-origin',
+    body: JSON.stringify({ option_id: optionId }),
+  });
+  if (!res.ok) {
+    const body = await res.json().catch(() => ({}));
+    throw new Error(body.error ?? `vote_failed_${res.status}`);
+  }
 }
