@@ -5,6 +5,7 @@ import {
   fetchMyVote,
   fetchResults,
   submitVote,
+  addOption,
   type Room as RoomT,
   type Results,
 } from '../lib/api';
@@ -20,6 +21,9 @@ export function Room() {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [justSaved, setJustSaved] = useState(false);
+  const [newLabel, setNewLabel] = useState('');
+  const [adding, setAdding] = useState(false);
+  const [addError, setAddError] = useState<string | null>(null);
   const inFlight = useRef(false);
 
   useEffect(() => {
@@ -107,6 +111,25 @@ export function Room() {
     }
   }
 
+  async function onAddOption(e: React.FormEvent) {
+    e.preventDefault();
+    if (!id) return;
+    const label = newLabel.trim();
+    if (!label) return;
+    setAdding(true);
+    setAddError(null);
+    try {
+      await addOption(id, label);
+      const refreshed = await fetchRoom(id);
+      setRoom(refreshed);
+      setNewLabel('');
+    } catch (err) {
+      setAddError(err instanceof Error ? err.message : '追加失败');
+    } finally {
+      setAdding(false);
+    }
+  }
+
   const total = results?.total_participants ?? 0;
 
   return (
@@ -154,6 +177,30 @@ export function Room() {
       >
         {closed ? '投票已结束' : submitting ? '提交中…' : '提交'}
       </button>
+
+      {room.allow_add && !closed && (
+        <form className="add-option" onSubmit={onAddOption}>
+          <label htmlFor="new-opt" className="sr-only">
+            追加新候选项
+          </label>
+          <input
+            id="new-opt"
+            type="text"
+            placeholder="追加新候选项"
+            value={newLabel}
+            onChange={(e) => setNewLabel(e.target.value)}
+            maxLength={80}
+          />
+          <button type="submit" disabled={adding || newLabel.trim().length === 0}>
+            {adding ? '添加中…' : '+ 添加'}
+          </button>
+          {addError && (
+            <p role="alert" className="error">
+              {addError}
+            </p>
+          )}
+        </form>
+      )}
 
       <section className="results" aria-live="polite">
         <h2>当前结果</h2>

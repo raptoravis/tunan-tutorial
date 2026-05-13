@@ -86,3 +86,13 @@ export async function fetchResults(roomId: string): Promise<Results> {
   const res = await fetch(`/api/rooms/${roomId}/results`, { credentials: 'include' });
   return jsonOrThrow<Results>(res);
 }
+
+export async function addOption(roomId: string, label: string): Promise<{ id: number; label: string }> {
+  const res = await fetch(`/api/rooms/${roomId}/options`, {
+    method: 'POST',
+    credentials: 'include',
+    headers: { 'content-type': 'application/json' },
+    body: JSON.stringify({ label }),
+  });
+  return jsonOrThrow<{ id: number; label: string }>(res);
+}
