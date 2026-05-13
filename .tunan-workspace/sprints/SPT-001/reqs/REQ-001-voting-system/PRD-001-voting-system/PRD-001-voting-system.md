@@ -3,7 +3,7 @@ id: PRD-001
 title: 轻量投票系统 PRD
 owner: raptoravis
 kind: feature
-status: ready
+status: in_progress
 created: 2026-05-13
 updated: 2026-05-13
 source_id: REQ-001
