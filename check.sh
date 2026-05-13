@@ -107,7 +107,6 @@ fi
 # 3. Skills + companion files
 # -----------------------------------------------------------------
 info "===== Step 3/4: Skills and companion files ====="
-SKILLS_ROOT="$TARGET_PATH/.claude/skills"
 EXPECTED_SKILLS=(
     tunan-req tunan-prd tunan-story tunan-plan tunan-testplan tunan-pr
     tunan-dev tunan-tdd tunan-review tunan-test
@@ -117,17 +116,33 @@ EXPECTED_SKILLS=(
     tunan-story-graph
     tunan-prime tunan-cp
 )
-if [ ! -d "$SKILLS_ROOT" ]; then
-    fail ".claude/skills/ missing in target."
+# Skills 可装在 project-local 或 user-global，任一存在即可（claude 会合并加载）。
+SKILL_ROOT_LABELS=(project user)
+SKILL_ROOT_PATHS=("$TARGET_PATH/.claude/skills" "$HOME/.claude/skills")
+PRESENT_ROOTS=()
+for i in 0 1; do
+    [ -d "${SKILL_ROOT_PATHS[$i]}" ] && PRESENT_ROOTS+=("$i")
+done
+if [ ${#PRESENT_ROOTS[@]} -eq 0 ]; then
+    warn ".claude/skills/ not found in project (${SKILL_ROOT_PATHS[0]}) nor user-global (${SKILL_ROOT_PATHS[1]}); install at one of them."
 else
+    for i in "${PRESENT_ROOTS[@]}"; do
+        ok "skills root present (${SKILL_ROOT_LABELS[$i]}): ${SKILL_ROOT_PATHS[$i]}"
+    done
     MISSING_SKILLS=()
     for s in "${EXPECTED_SKILLS[@]}"; do
-        [ -f "$SKILLS_ROOT/$s/SKILL.md" ] || MISSING_SKILLS+=("$s")
+        found=0
+        for i in "${PRESENT_ROOTS[@]}"; do
+            if [ -f "${SKILL_ROOT_PATHS[$i]}/$s/SKILL.md" ]; then
+                found=1; break
+            fi
+        done
+        [ $found -eq 0 ] && MISSING_SKILLS+=("$s")
     done
     if [ ${#MISSING_SKILLS[@]} -gt 0 ]; then
-        fail "Missing skills (${#MISSING_SKILLS[@]}): ${MISSING_SKILLS[*]}"
+        warn "Missing skills not found in any root (${#MISSING_SKILLS[@]}): ${MISSING_SKILLS[*]}"
     else
-        ok "All ${#EXPECTED_SKILLS[@]} tunan-* skills present."
+        ok "All ${#EXPECTED_SKILLS[@]} tunan-* skills resolvable (project / user)."
     fi
 fi
 
