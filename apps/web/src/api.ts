@@ -4,6 +4,12 @@ export interface PollOption {
   position: number;
 }
 
+export interface Tally {
+  option_id: string;
+  count: number;
+  percent: number;
+}
+
 export interface Poll {
   id: string;
   title: string;
@@ -12,6 +18,8 @@ export interface Poll {
   is_owner: boolean;
   your_option_id: string | null;
   closed: boolean;
+  tallies: Tally[];
+  total_votes: number;
 }
 
 export interface CreatePollInput {

@@ -23,6 +23,11 @@ function pollResponse(overrides: Record<string, unknown> = {}) {
       is_owner: false,
       your_option_id: null,
       closed: false,
+      tallies: [
+        { option_id: 'opt-a', count: 0, percent: 0 },
+        { option_id: 'opt-b', count: 0, percent: 0 },
+      ],
+      total_votes: 0,
       ...overrides,
     }),
     { status: 200, headers: { 'content-type': 'application/json' } },
@@ -74,5 +79,54 @@ describe('PollPage', () => {
     expect(screen.getByLabelText('vote-opt-b')).toBeChecked();
     expect(screen.getByLabelText('vote-opt-a')).not.toBeChecked();
     expect(screen.getByLabelText('your-choice')).toBeInTheDocument();
+  });
+
+  it('T-WR1 renders counts and percent per option', async () => {
+    fetchMock.mockResolvedValueOnce(
+      pollResponse({
+        total_votes: 3,
+        tallies: [
+          { option_id: 'opt-a', count: 2, percent: 66.7 },
+          { option_id: 'opt-b', count: 1, percent: 33.3 },
+        ],
+      }),
+    );
+    render(<PollPage id="pid1234567" />);
+    await screen.findByText('中饭吃啥');
+    expect(screen.getByLabelText('tally-opt-a')).toHaveTextContent('2 票');
+    expect(screen.getByLabelText('tally-opt-a')).toHaveTextContent('66.7%');
+    expect(screen.getByLabelText('tally-opt-b')).toHaveTextContent('1 票');
+    expect(screen.getByLabelText('total-votes')).toHaveTextContent('3 票');
+  });
+
+  it('T-WR2 total_votes=0 shows 暂无投票', async () => {
+    fetchMock.mockResolvedValueOnce(pollResponse({ total_votes: 0 }));
+    render(<PollPage id="pid1234567" />);
+    await screen.findByText('中饭吃啥');
+    expect(screen.getByLabelText('total-votes')).toHaveTextContent('暂无投票');
+  });
+
+  it('T-WR3 after self-vote, refresh reflects new tallies', async () => {
+    fetchMock
+      .mockResolvedValueOnce(pollResponse())
+      .mockResolvedValueOnce(new Response('{"ok":true}', { status: 200 }))
+      .mockResolvedValueOnce(
+        pollResponse({
+          your_option_id: 'opt-a',
+          total_votes: 1,
+          tallies: [
+            { option_id: 'opt-a', count: 1, percent: 100 },
+            { option_id: 'opt-b', count: 0, percent: 0 },
+          ],
+        }),
+      );
+    const user = userEvent.setup();
+    render(<PollPage id="pid1234567" />);
+    await screen.findByText('中饭吃啥');
+    await user.click(screen.getByLabelText('vote-opt-a'));
+    await user.click(screen.getByRole('button', { name: /提交投票/ }));
+    await waitFor(() => {
+      expect(screen.getByLabelText('tally-opt-a')).toHaveTextContent('1 票');
+    });
   });
 });

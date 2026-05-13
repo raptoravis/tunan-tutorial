@@ -95,6 +95,17 @@ pollsRoute.get('/:id', (c) => {
 
   const closed = poll.deadline_at != null && new Date(poll.deadline_at).getTime() < Date.now();
 
+  const counts = db
+    .prepare('SELECT option_id, COUNT(*) as cnt FROM votes WHERE poll_id = ? GROUP BY option_id')
+    .all(id) as Array<{ option_id: string; cnt: number }>;
+  const countByOption = new Map(counts.map((r) => [r.option_id, r.cnt]));
+  const total_votes = counts.reduce((s, r) => s + r.cnt, 0);
+  const tallies = options.map((o) => {
+    const count = countByOption.get(o.id) ?? 0;
+    const percent = total_votes === 0 ? 0 : Math.round((count / total_votes) * 1000) / 10;
+    return { option_id: o.id, count, percent };
+  });
+
   return c.json({
     id: poll.id,
     title: poll.title,
@@ -103,6 +114,8 @@ pollsRoute.get('/:id', (c) => {
     is_owner,
     your_option_id,
     closed,
+    tallies,
+    total_votes,
   });
 });
 
