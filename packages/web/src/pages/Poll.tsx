@@ -1,6 +1,11 @@
 import { useEffect, useState } from "react";
 import { getPoll, vote, type PollDetail, type VoteResponse } from "../api.js";
 
+interface ApiErr extends Error {
+  status?: number;
+  error?: string;
+}
+
 interface Props {
   shortCode: string;
 }
@@ -56,8 +61,21 @@ export function Poll({ shortCode }: Props) {
       setPoll({ ...poll, totalVotes: r.totalVotes, results: r.results });
       setView("results");
     } catch (e) {
-      setErrMsg(e instanceof Error ? e.message : "投票失败");
-      setSubmitting(false);
+      const err = e as ApiErr;
+      if (err.status === 409) {
+        // already voted: fetch latest results and switch to results view
+        try {
+          const fresh = await getPoll(shortCode);
+          setPoll(fresh);
+        } catch {
+          /* ignore */
+        }
+        setErrMsg("你已投过此话题");
+        setView("results");
+      } else {
+        setErrMsg(err.message ?? "投票失败");
+        setSubmitting(false);
+      }
     }
   };
 
