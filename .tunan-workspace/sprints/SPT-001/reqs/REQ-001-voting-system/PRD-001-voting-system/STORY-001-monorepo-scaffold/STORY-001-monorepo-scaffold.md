@@ -3,12 +3,13 @@ id: STORY-001
 title: 搭 monorepo 脚手架（server + web + SQLite 健康检查）
 owner: raptoravis
 source_id: PRD-001
-status: ready
+status: done
 created: 2026-05-13
 updated: 2026-05-13
 priority: P0
 estimate: S
 blocked_by: []
+merged_pr: 15
 ---
 
 # STORY-001 — Monorepo 脚手架
