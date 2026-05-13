@@ -2,7 +2,9 @@
 id: PR-002
 title: STORY-002 投票与改票
 owner: raptoravis
-status: sponsor_wait
+status: merged
+merged_at: 2026-05-13T08:01:30Z
+merge_strategy: merge
 created: 2026-05-13
 updated: 2026-05-13
 source_id: TESTPLAN-002

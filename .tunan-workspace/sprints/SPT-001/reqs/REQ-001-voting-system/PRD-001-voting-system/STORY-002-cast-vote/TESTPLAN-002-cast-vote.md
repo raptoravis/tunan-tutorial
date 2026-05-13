@@ -2,7 +2,7 @@
 id: TESTPLAN-002
 title: 投票与改票 TESTPLAN
 owner: raptoravis
-status: ready
+status: done
 created: 2026-05-13
 updated: 2026-05-13
 source_id: PLAN-002

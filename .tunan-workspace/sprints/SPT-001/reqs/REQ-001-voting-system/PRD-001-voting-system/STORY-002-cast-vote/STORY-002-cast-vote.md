@@ -2,7 +2,7 @@
 id: STORY-002
 title: 投票与改票（单选 + session 防刷）
 owner: raptoravis
-status: in_progress
+status: done
 created: 2026-05-13
 updated: 2026-05-13
 source_id: PRD-001
