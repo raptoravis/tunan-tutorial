@@ -76,3 +76,13 @@ export async function submitVote(
   });
   return jsonOrThrow<{ ok: true; selected: number[] }>(res);
 }
+
+export type Results = {
+  total_participants: number;
+  options: { id: number; label: string; votes: number }[];
+};
+
+export async function fetchResults(roomId: string): Promise<Results> {
+  const res = await fetch(`/api/rooms/${roomId}/results`, { credentials: 'include' });
+  return jsonOrThrow<Results>(res);
+}
