@@ -49,6 +49,17 @@ export function renderPollPage(p: PollViewData): string {
     ${statusBanner}
     <p class="meta">截止：<time datetime="${deadline.toISOString()}">${escapeHtml(deadline.toLocaleString('zh-CN'))}</time></p>
     <ul class="options-list" id="options-list" aria-label="候选项">${optionsHtml}</ul>
+
+    <section aria-label="结果" style="margin-top:1.5rem">
+      <h2 style="font-size:1.05rem;margin:.25rem 0 .5rem">当前结果 <span id="total-voters" class="meta">（0 人已投）</span></h2>
+      <ul id="results-list" class="results-list" aria-live="polite">
+        ${p.options.map((o) => `<li class="result-row" data-option-id="${escapeHtml(o.id)}">
+          <span class="result-label">${escapeHtml(o.label)}</span>
+          <span class="result-bar"><span class="result-bar-fill" style="width:0%"></span></span>
+          <span class="result-count">0 票 (0%)</span>
+        </li>`).join('')}
+      </ul>
+    </section>
     <style>
       .option { padding: 0; background: transparent; border: 0; list-style: none }
       .option-btn {
@@ -62,6 +73,12 @@ export function renderPollPage(p: PollViewData): string {
       .option-btn:focus-visible { outline: 3px solid #93c5fd; outline-offset: 2px }
       .badge { font-size: .8rem; color: #2563eb; font-weight: 700 }
       .vote-form { margin: 0 }
+      .results-list { list-style: none; padding: 0; margin: 0; display: grid; gap: .5rem }
+      .result-row { display: grid; grid-template-columns: 1fr auto; gap: .25rem .75rem; align-items: center }
+      .result-label { font-weight: 600 }
+      .result-count { color: #666; font-size: .9rem; white-space: nowrap }
+      .result-bar { grid-column: 1 / -1; height: 6px; background: #e5e7eb; border-radius: 3px; overflow: hidden }
+      .result-bar-fill { display: block; height: 100%; background: #2563eb; transition: width .3s ease }
     </style>
     <script>
       document.querySelectorAll('.vote-form').forEach((f) => {
@@ -77,6 +94,27 @@ export function renderPollPage(p: PollViewData): string {
           if (r.ok) location.reload();
         });
       });
+
+      const POLL_ID = ${JSON.stringify(p.id)};
+      const POLL_CLOSED = ${closed ? 'true' : 'false'};
+      let pollTimer = null;
+      async function refreshResults() {
+        try {
+          const r = await fetch('/api/polls/' + POLL_ID + '/results', { credentials: 'same-origin' });
+          if (!r.ok) return;
+          const data = await r.json();
+          document.getElementById('total-voters').textContent = '（' + data.totalVoters + ' 人已投）';
+          for (const opt of data.options) {
+            const row = document.querySelector('.result-row[data-option-id="' + opt.id + '"]');
+            if (!row) continue;
+            row.querySelector('.result-count').textContent = opt.count + ' 票 (' + opt.percent + '%)';
+            row.querySelector('.result-bar-fill').style.width = opt.percent + '%';
+          }
+          if (data.closed && pollTimer) { clearInterval(pollTimer); pollTimer = null; }
+        } catch (e) { /* swallow */ }
+      }
+      refreshResults();
+      if (!POLL_CLOSED) pollTimer = setInterval(refreshResults, 5000);
     </script>
     `,
   );
