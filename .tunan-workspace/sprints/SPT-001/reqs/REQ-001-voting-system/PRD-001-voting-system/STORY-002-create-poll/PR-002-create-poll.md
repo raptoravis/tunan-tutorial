@@ -3,7 +3,7 @@ id: PR-002
 title: STORY-002 创建投票 PR
 owner: raptoravis
 source_id: TESTPLAN-002
-status: reviewing
+status: merged
 created: 2026-05-13
 updated: 2026-05-13
 gh_pr: 13
