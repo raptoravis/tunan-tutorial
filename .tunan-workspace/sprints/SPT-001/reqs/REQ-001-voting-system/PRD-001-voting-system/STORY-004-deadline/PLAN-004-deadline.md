@@ -3,7 +3,7 @@ id: PLAN-004
 title: STORY-004 截止时间 实现计划
 owner: raptoravis
 source_id: STORY-004
-status: ready
+status: done
 created: 2026-05-13
 updated: 2026-05-13
 priority: P2
