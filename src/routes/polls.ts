@@ -126,6 +126,36 @@ export function pollsRoutes(db: DB) {
     return c.json({ optionId, nickname: nickname ?? null });
   });
 
+  r.get('/api/polls/:id/results', (c) => {
+    const id = c.req.param('id');
+    const poll = db
+      .prepare(`SELECT id, deadline_ms, closed_at_ms FROM polls WHERE id = ?`)
+      .get(id) as { id: string; deadline_ms: number; closed_at_ms: number | null } | undefined;
+    if (!poll) return c.json({ error: 'poll_not_found' }, 404);
+
+    const rows = db
+      .prepare(
+        `SELECT o.id AS id, o.label AS label,
+                (SELECT COUNT(*) FROM votes v WHERE v.option_id = o.id) AS count
+         FROM options o WHERE o.poll_id = ? ORDER BY o.created_at_ms`,
+      )
+      .all(id) as unknown as Array<{ id: string; label: string; count: number }>;
+
+    const totalVoters = rows.reduce((s, r) => s + Number(r.count), 0);
+    const options = rows.map((r) => ({
+      id: r.id,
+      label: r.label,
+      count: Number(r.count),
+      percent: totalVoters === 0 ? 0 : Math.round((Number(r.count) / totalVoters) * 1000) / 10,
+    }));
+
+    return c.json({
+      closed: pollIsClosed(poll, Date.now()),
+      totalVoters,
+      options,
+    });
+  });
+
   r.get('/v/:id', (c) => {
     const id = c.req.param('id');
     const poll = db
