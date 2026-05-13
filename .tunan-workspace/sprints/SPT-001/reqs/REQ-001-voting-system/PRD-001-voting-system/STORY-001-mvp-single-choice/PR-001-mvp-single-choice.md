@@ -3,7 +3,10 @@ id: PR-001
 title: "STORY-001: MVP 单选投票端到端"
 owner: raptoravis
 source_id: TESTPLAN-001
-status: sponsor_wait
+status: merged
+merged_at: 2026-05-13T02:02:53Z
+merged_sha: 736fa8a5645f1d38e47658b32a75125ba6d00c6e
+merge_strategy: merge
 created: 2026-05-13
 updated: 2026-05-13
 priority: P2

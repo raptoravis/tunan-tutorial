@@ -3,7 +3,7 @@ id: TESTPLAN-001
 title: STORY-001 MVP 测试计划
 owner: raptoravis
 source_id: PLAN-001
-status: ready
+status: done
 created: 2026-05-13
 updated: 2026-05-13
 priority: P2

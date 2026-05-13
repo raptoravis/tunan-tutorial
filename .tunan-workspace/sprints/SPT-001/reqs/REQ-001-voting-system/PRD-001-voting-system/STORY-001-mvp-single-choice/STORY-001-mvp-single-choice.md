@@ -3,7 +3,7 @@ id: STORY-001
 title: MVP 端到端 — 创建单选投票、投票、看结果
 owner: raptoravis
 source_id: PRD-001
-status: in_progress
+status: done
 created: 2026-05-13
 updated: 2026-05-13
 priority: P2

@@ -3,7 +3,7 @@ id: PLAN-001
 title: STORY-001 MVP 实现计划
 owner: raptoravis
 source_id: STORY-001
-status: ready
+status: done
 created: 2026-05-13
 updated: 2026-05-13
 priority: P2

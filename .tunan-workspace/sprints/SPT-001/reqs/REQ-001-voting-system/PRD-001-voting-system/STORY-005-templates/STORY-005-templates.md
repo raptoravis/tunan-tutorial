@@ -8,7 +8,7 @@ created: 2026-05-13
 updated: 2026-05-13
 priority: P2
 estimate: S
-blocked_by: [STORY-001]
+blocked_by: []
 pre_auth:
   by: raptoravis
   at: 2026-05-13T00:00:00Z
