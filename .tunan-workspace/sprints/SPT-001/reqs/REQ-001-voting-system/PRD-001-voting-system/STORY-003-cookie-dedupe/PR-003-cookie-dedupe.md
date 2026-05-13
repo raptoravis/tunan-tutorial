@@ -3,7 +3,9 @@ id: PR-003
 title: "STORY-003: cookie 防重复投票"
 owner: raptoravis
 source_id: TESTPLAN-003
-status: sponsor_wait
+status: merged
+merged_at: 2026-05-13T02:13:00Z
+merge_strategy: merge
 created: 2026-05-13
 updated: 2026-05-13
 priority: P2

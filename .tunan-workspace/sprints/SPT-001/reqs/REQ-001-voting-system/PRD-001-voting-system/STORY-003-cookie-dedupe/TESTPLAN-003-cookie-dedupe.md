@@ -3,7 +3,7 @@ id: TESTPLAN-003
 title: STORY-003 cookie 防重复 测试计划
 owner: raptoravis
 source_id: PLAN-003
-status: ready
+status: done
 created: 2026-05-13
 updated: 2026-05-13
 priority: P2
