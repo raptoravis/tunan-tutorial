@@ -55,4 +55,37 @@ describe('CreatePage', () => {
     await vi.waitFor(() => expect(onCreated).toHaveBeenCalledWith('abc1234567'));
     expect(fetchMock).toHaveBeenCalledOnce();
   });
+
+  it('T-TPL1 lunch template prefills title + 4 options', async () => {
+    const user = userEvent.setup();
+    render(<CreatePage onCreated={() => {}} />);
+    await user.click(screen.getByLabelText('template-lunch'));
+    expect((screen.getByLabelText('title') as HTMLInputElement).value).toBe('今天中饭吃啥？');
+    expect((screen.getByLabelText('option-0') as HTMLInputElement).value).toBe('麻辣烫');
+    expect((screen.getByLabelText('option-3') as HTMLInputElement).value).toBe('自带便当');
+  });
+
+  it('T-TPL2 travel template prefills title + 4 destinations', async () => {
+    const user = userEvent.setup();
+    render(<CreatePage onCreated={() => {}} />);
+    await user.click(screen.getByLabelText('template-travel'));
+    expect((screen.getByLabelText('title') as HTMLInputElement).value).toBe('下次团建去哪？');
+    expect((screen.getByLabelText('option-0') as HTMLInputElement).value).toBe('杭州');
+  });
+
+  it('T-TPL3 template buttons are type=button (no form submit)', () => {
+    render(<CreatePage onCreated={() => {}} />);
+    expect(screen.getByLabelText('template-lunch')).toHaveAttribute('type', 'button');
+    expect(screen.getByLabelText('template-travel')).toHaveAttribute('type', 'button');
+  });
+
+  it('T-TPL4 prefilled fields remain editable', async () => {
+    const user = userEvent.setup();
+    render(<CreatePage onCreated={() => {}} />);
+    await user.click(screen.getByLabelText('template-lunch'));
+    const titleInput = screen.getByLabelText('title') as HTMLInputElement;
+    await user.clear(titleInput);
+    await user.type(titleInput, '改了的标题');
+    expect(titleInput.value).toBe('改了的标题');
+  });
 });

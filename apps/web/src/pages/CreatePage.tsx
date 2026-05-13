@@ -1,5 +1,6 @@
 import { useState, type FormEvent } from 'react';
 import { createPoll } from '../api.js';
+import { TEMPLATES } from '../templates.js';
 
 const OPT_MIN = 2;
 const OPT_MAX = 10;
@@ -63,9 +64,31 @@ export function CreatePage({ onCreated }: Props) {
     }
   };
 
+  const applyTemplate = (key: string) => {
+    const t = TEMPLATES.find((x) => x.key === key);
+    if (!t) return;
+    setTitle(t.title);
+    setOptions([...t.options]);
+    setError(null);
+  };
+
   return (
     <main style={{ maxWidth: 540, margin: '40px auto', padding: '0 16px', fontFamily: 'system-ui' }}>
       <h1>发起一个投票</h1>
+      <div aria-label="templates" style={{ marginBottom: 16, display: 'flex', gap: 8 }}>
+        <span style={{ color: '#666', fontSize: 13, alignSelf: 'center' }}>模板：</span>
+        {TEMPLATES.map((t) => (
+          <button
+            key={t.key}
+            type="button"
+            onClick={() => applyTemplate(t.key)}
+            aria-label={`template-${t.key}`}
+            style={{ padding: '4px 10px', fontSize: 13 }}
+          >
+            {t.label}
+          </button>
+        ))}
+      </div>
       <form onSubmit={onSubmit} aria-label="create-poll-form">
         <label style={{ display: 'block', marginBottom: 8 }}>
           <span>标题</span>
