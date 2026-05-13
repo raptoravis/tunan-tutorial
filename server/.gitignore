@@ -1,6 +1,5 @@
-node_modules
-dist
-*.db
+data.db
 *.db-journal
 *.db-shm
 *.db-wal
+dist/
