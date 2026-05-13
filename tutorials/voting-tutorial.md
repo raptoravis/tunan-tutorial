@@ -12,7 +12,7 @@
 ## 前置
 
 - 在仓库根跑 `./check-windows.ps1`（Windows）或 `./check.sh`（macOS/Linux）输出 **All checks passed**
-  - 校验内容：前置 CLI、3 MCP、25 个 tunan-* skill、`.tunan-workspace/{worktrees,retro,raw-reqs/<current>,sprints/<current>/reqs}` + `settings.md`、`USER.md`、`tutorials/`、`gh` 已登录
+  - 校验内容：前置 CLI、3 MCP、26 个 tunan-* skill、`.tunan-workspace/{worktrees,retro,raw-reqs/<current>,sprints/<current>/reqs}` + `settings.md`、`USER.md`、`tutorials/`、`gh` 已登录
   - 任一红色 `[ERROR]` 都先解决再继续
 - 当前 git user 即是 sponsor 的 owner 名
 
@@ -20,7 +20,7 @@
 
 ---
 
-## skill 全景（25 个）
+## skill 全景（26 个）
 
 按职责分四组：
 
@@ -29,7 +29,7 @@
 | **主链路 6 站** | tunan-req / tunan-prd / tunan-story / tunan-plan / tunan-testplan / tunan-dev | 把 raw-req MD 文件逐站推到代码                       |
 | **PR 闭环**    | tunan-pr / tunan-review / tunan-test / tunan-tdd / tunan-merge / tunan-verify | PR 自驱动 + 合并后验收                              |
 | **入口 / 接管 / 失败**| tunan-triage / tunan-diagnose / tunan-pr-resolve / tunan-takeover / tunan-grill | 批量分诊 issue / bug 诊断 / PR 卡死 / 接手他人 / 追问模糊 |
-| **横切元工具** | tunan-prime / tunan-align / tunan-cp / tunan-parallel-pick / tunan-story-graph / tunan-retro / tunan-improve-arch / **tunan-pipeline** | 看现状 / 对齐 / 提交推送 / 并行拣选 / 依赖图 / 回顾 / 架构反思 / **一键全流程** |
+| **横切元工具** | tunan-prime / tunan-align / tunan-cp / tunan-parallel-pick / tunan-story-graph / tunan-retro / tunan-improve-arch / tunan-rawreq-organize / **tunan-pipeline** | 看现状 / 对齐 / 提交推送 / 并行拣选 / 依赖图 / 回顾 / 架构反思 / raw-req 整理 / **一键全流程** |
 
 > **一键全流程**：信任默认时，先在 `.tunan-workspace/raw-reqs/<current_sprint>/` 下写一份原始需求 MD，再 `/tunan-pipeline <raw-req.md>`，它会把下面的步骤 1-9 串起来，每个对齐点应用"全部默认"或显式 `--pre-auth`。本教程仍按"分站手动"走，便于看清每环职责。
 
@@ -63,6 +63,7 @@
 | `tunan-parallel-pick` | 步骤 3 实跑默认建议 | `/tunan-parallel-pick` 默认 STORY 池只读建议；`--pool=plan` 换池；`--max=N` 限数量；`--owner=any` 不限 owner；`--queue [--max=N]` 顺序自动跑一批；`--queue --resume` 续做中断队列。 |
 | `tunan-retro` | 步骤 16 实跑 | `/tunan-retro` 通用复盘；`/tunan-retro <REQ-id\|PR-id>` 围绕事件；`--since=<YYYY-MM-DD>` 按时间窗复盘。改 skill 必须展示 diff 后二次确认。 |
 | `tunan-improve-arch` | 进阶段落说明 | `/tunan-improve-arch` 通用架构扫描；`--area=<path>` 限定子树；`--from-retros` 只基于 retro 历史推导。只产出新 REQ，不当场改代码。 |
+| `tunan-rawreq-organize` | 步骤 1 预备说明 | `/tunan-rawreq-organize` 默认整理 `current_sprint` 下所有 raw-req MD；`<sprint-id>` 指定 sprint；`<raw-req.md 路径>` 只整理单个 MD 及其引用图；`--dry-run` 只看计划不动文件；`--no-vision` 不调 vision，按出现顺序产 `fig-N` 名。把每个 raw-req MD 连同它引用的截图下沉到与 MD 同名子目录，截图改为语义化 kebab-case 名，MD 引用路径同步改写；孤儿图（无 MD 引用）不动；不自动 commit。 |
 | `tunan-pipeline` | 全景说明、调试备忘说明 | `/tunan-pipeline <raw-req.md>` 默认形态，从 raw-req MD 文件全链路；`--from-issue <#>` 从 issue；`--from-conversation` 显式从当前对话抽取（必须显式指定）；`<REQ-id>` 从已有 REQ 续推；`--stop-at=plan` 到 PLAN 停；`--no-merge` 到 sponsor_wait 停；`--pre-auth` 预授权 TDD red-gate + PR LGTM；`--story-limit=N` 防 STORY 爆炸；`--watch-pr` 起 PR 后自动 watch；`--parallel` 调并行拣选；`--abort` 中止流水线。 |
 
 ---
@@ -92,6 +93,8 @@ sponsor> /tunan-req .tunan-workspace/raw-reqs/SPT-001/2026-05-12-voting-system.m
 ```
 
 > 不想写文件，确实只想从对话抽取？显式 `--from-conversation`；默认不再静默 fallback 到对话。
+>
+> 如果 raw-req MD 里贴了一堆 `msedge_*.jpg` / `Screenshot 2026-...png` 这类无意义文件名的截图，先跑 `/tunan-rawreq-organize` —— 它会把每个 MD 连同它引用的图下沉到同名子目录、截图改成语义化 kebab-case 名、MD 内引用路径同步改写。整理后再 `/tunan-req <子目录>/<slug>.md`。
 
 预期：
 - claude **开始**播报"将走 1) 抽取 2) research 3) top3 4) 入池"
@@ -435,6 +438,7 @@ skill 改动：`.claude/skills/tunan-testplan/SKILL.md` 在 Persona 模板加了
 - PR 状态 failed / 合并冲突 / CI 红 / 评论挤压不收敛 → `/tunan-pr-resolve <PR-id>`（必要时 `--rebase` 或 `--abandon`）
 - 想中断流程 → 手 `git status` 看；不要硬 reset，先看 PR 池条目 status
 - 想一键跑全流程而不是分站 → 先写一份 `.tunan-workspace/raw-reqs/<current_sprint>/<YYYY-MM-DD>-<slug>.md`，再 `/tunan-pipeline <raw-req.md>`（参 skill 全景表）
+- raw-reqs 目录里截图名一团乱（`msedge_*.jpg`、`image123.png`） → `/tunan-rawreq-organize`，可加 `--dry-run` 先看计划
 
 ---
 
