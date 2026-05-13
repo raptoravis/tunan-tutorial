@@ -3,7 +3,7 @@ id: TESTPLAN-002
 title: STORY-002 多选模式 测试计划
 owner: raptoravis
 source_id: PLAN-002
-status: ready
+status: done
 created: 2026-05-13
 updated: 2026-05-13
 priority: P2
