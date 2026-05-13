@@ -1,28 +1,61 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { fetchRoom, fetchMyVote, submitVote, type Room as RoomT } from '../lib/api';
+import {
+  fetchRoom,
+  fetchMyVote,
+  fetchResults,
+  submitVote,
+  type Room as RoomT,
+  type Results,
+} from '../lib/api';
+
+const POLL_MS = 1500;
 
 export function Room() {
   const { id } = useParams<{ id: string }>();
   const [room, setRoom] = useState<RoomT | null>(null);
   const [selected, setSelected] = useState<Set<number>>(new Set());
+  const [results, setResults] = useState<Results | null>(null);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [justSaved, setJustSaved] = useState(false);
+  const inFlight = useRef(false);
 
   useEffect(() => {
     if (!id) return;
     setLoading(true);
     setError(null);
-    Promise.all([fetchRoom(id), fetchMyVote(id).catch(() => ({ selected: [] }))])
-      .then(([r, mv]) => {
+    Promise.all([
+      fetchRoom(id),
+      fetchMyVote(id).catch(() => ({ selected: [] })),
+      fetchResults(id).catch(() => null),
+    ])
+      .then(([r, mv, rs]) => {
         setRoom(r);
         setSelected(new Set(mv.selected));
+        if (rs) setResults(rs);
       })
       .catch((e) => setError(e instanceof Error ? e.message : '加载失败'))
       .finally(() => setLoading(false));
   }, [id]);
+
+  useEffect(() => {
+    if (!id || !room) return;
+    const timer = window.setInterval(async () => {
+      if (inFlight.current) return;
+      inFlight.current = true;
+      try {
+        const r = await fetchResults(id);
+        setResults(r);
+      } catch {
+        /* ignore transient errors */
+      } finally {
+        inFlight.current = false;
+      }
+    }, POLL_MS);
+    return () => window.clearInterval(timer);
+  }, [id, room]);
 
   if (loading) {
     return (
@@ -31,7 +64,6 @@ export function Room() {
       </main>
     );
   }
-
   if (error || !room) {
     return (
       <main className="container">
@@ -63,16 +95,19 @@ export function Room() {
     setSubmitting(true);
     setError(null);
     try {
-      const ids = Array.from(selected);
-      const res = await submitVote(id, ids);
+      const res = await submitVote(id, Array.from(selected));
       setSelected(new Set(res.selected));
       setJustSaved(true);
+      const r = await fetchResults(id);
+      setResults(r);
     } catch (e) {
       setError(e instanceof Error ? e.message : '提交失败');
     } finally {
       setSubmitting(false);
     }
   }
+
+  const total = results?.total_participants ?? 0;
 
   return (
     <main className="container">
@@ -106,16 +141,42 @@ export function Room() {
           {error}
         </p>
       )}
-
       {justSaved && !error && (
         <p role="status" className="help">
           已投票，可修改。
         </p>
       )}
 
-      <button type="button" onClick={onSubmit} disabled={closed || submitting || selected.size === 0}>
+      <button
+        type="button"
+        onClick={onSubmit}
+        disabled={closed || submitting || selected.size === 0}
+      >
         {closed ? '投票已结束' : submitting ? '提交中…' : '提交'}
       </button>
+
+      <section className="results" aria-live="polite">
+        <h2>当前结果</h2>
+        <p className="help">参与人数：{total}</p>
+        <ul className="results-list">
+          {(results?.options ?? room.options.map((o) => ({ ...o, votes: 0 }))).map((o) => {
+            const pct = total > 0 ? Math.round((o.votes / total) * 100) : 0;
+            return (
+              <li key={o.id}>
+                <div className="results-row">
+                  <span className="results-label">{o.label}</span>
+                  <span className="results-count">
+                    {o.votes} 票 ({pct}%)
+                  </span>
+                </div>
+                <div className="bar" aria-hidden="true">
+                  <div className="bar-fill" style={{ width: `${pct}%` }} />
+                </div>
+              </li>
+            );
+          })}
+        </ul>
+      </section>
 
       <p style={{ marginTop: 32 }}>
         <Link to="/">再建一个</Link>

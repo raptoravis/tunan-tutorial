@@ -95,3 +95,30 @@ votes.get('/api/rooms/:id/my-vote', (c) => {
     .all(id, pt) as { option_id: number }[];
   return c.json({ selected: rows.map((r) => r.option_id) });
 });
+
+votes.get('/api/rooms/:id/results', (c) => {
+  const id = c.req.param('id');
+  if (!ROOM_ID_RE.test(id)) return c.json({ error: 'room id 格式非法' }, 404);
+  const room = getRoom(id);
+  if (!room) return c.json({ error: '房间不存在' }, 404);
+
+  const db = getDb();
+  const opts = db
+    .prepare(
+      `SELECT o.id AS id, o.label AS label, COUNT(v.id) AS votes
+       FROM options o
+       LEFT JOIN votes v ON v.option_id = o.id
+       WHERE o.room_id = ? AND o.deleted_at IS NULL
+       GROUP BY o.id
+       ORDER BY o.id`,
+    )
+    .all(id) as { id: number; label: string; votes: number }[];
+  const total = db
+    .prepare('SELECT COUNT(DISTINCT participant_token) AS n FROM votes WHERE room_id = ?')
+    .get(id) as { n: number };
+
+  return c.json({
+    total_participants: total.n,
+    options: opts.map((o) => ({ id: o.id, label: o.label, votes: o.votes })),
+  });
+});
