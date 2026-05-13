@@ -3,7 +3,7 @@ id: STORY-001
 title: 项目脚手架 + 创建投票端到端
 owner: raptoravis
 kind: feature
-status: ready
+status: done
 created: 2026-05-13
 updated: 2026-05-13
 source_id: PRD-001

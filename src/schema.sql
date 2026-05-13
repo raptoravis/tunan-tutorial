@@ -16,3 +16,14 @@ CREATE TABLE IF NOT EXISTS options (
 );
 
 CREATE INDEX IF NOT EXISTS idx_options_poll ON options(poll_id);
+
+CREATE TABLE IF NOT EXISTS votes (
+  poll_id         TEXT NOT NULL REFERENCES polls(id) ON DELETE CASCADE,
+  session_id      TEXT NOT NULL,
+  option_id       TEXT NOT NULL REFERENCES options(id) ON DELETE CASCADE,
+  nickname        TEXT,
+  voted_at_ms     INTEGER NOT NULL,
+  PRIMARY KEY (poll_id, session_id)
+);
+
+CREATE INDEX IF NOT EXISTS idx_votes_option ON votes(option_id);
