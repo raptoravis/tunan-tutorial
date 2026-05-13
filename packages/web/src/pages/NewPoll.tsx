@@ -1,15 +1,19 @@
 import { useState } from "react";
 import { createPoll } from "../api.js";
+import { getTemplate } from "../templates.js";
 
 interface Props {
   navigate: (path: string) => void;
 }
 
 export function NewPoll({ navigate }: Props) {
-  const [title, setTitle] = useState("");
+  const tpl = getTemplate(
+    new URLSearchParams(window.location.search).get("template"),
+  );
+  const [title, setTitle] = useState(tpl?.title ?? "");
   const [mode, setMode] = useState<"single" | "multi">("single");
   const [deadline, setDeadline] = useState<string>("");
-  const [options, setOptions] = useState<string[]>(["", ""]);
+  const [options, setOptions] = useState<string[]>(tpl?.options ?? ["", ""]);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
