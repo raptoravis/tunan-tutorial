@@ -129,4 +129,51 @@ describe('PollPage', () => {
       expect(screen.getByLabelText('tally-opt-a')).toHaveTextContent('1 票');
     });
   });
+
+  it('T-WD1 non-owner does NOT see delete button', async () => {
+    fetchMock.mockResolvedValueOnce(pollResponse({ is_owner: false }));
+    render(<PollPage id="pid1234567" />);
+    await screen.findByText('中饭吃啥');
+    expect(screen.queryByLabelText('delete-poll')).not.toBeInTheDocument();
+  });
+
+  it('T-WD2 owner sees delete button', async () => {
+    fetchMock.mockResolvedValueOnce(pollResponse({ is_owner: true }));
+    render(<PollPage id="pid1234567" />);
+    await screen.findByText('中饭吃啥');
+    expect(screen.getByLabelText('delete-poll')).toBeInTheDocument();
+  });
+
+  it('T-WD3 cancelled confirm does NOT call DELETE', async () => {
+    fetchMock.mockResolvedValueOnce(pollResponse({ is_owner: true }));
+    const confirmSpy = vi.spyOn(window, 'confirm').mockReturnValue(false);
+    const user = userEvent.setup();
+    render(<PollPage id="pid1234567" />);
+    await screen.findByText('中饭吃啥');
+    await user.click(screen.getByLabelText('delete-poll'));
+    expect(confirmSpy).toHaveBeenCalled();
+    const deleteCall = fetchMock.mock.calls.find(
+      (c) => typeof c[1] === 'object' && (c[1] as RequestInit).method === 'DELETE',
+    );
+    expect(deleteCall).toBeUndefined();
+    confirmSpy.mockRestore();
+  });
+
+  it('T-WD4 confirmed delete calls DELETE and onDeleted', async () => {
+    fetchMock
+      .mockResolvedValueOnce(pollResponse({ is_owner: true }))
+      .mockResolvedValueOnce(new Response('{"ok":true}', { status: 200 }));
+    const confirmSpy = vi.spyOn(window, 'confirm').mockReturnValue(true);
+    const onDeleted = vi.fn();
+    const user = userEvent.setup();
+    render(<PollPage id="pid1234567" onDeleted={onDeleted} />);
+    await screen.findByText('中饭吃啥');
+    await user.click(screen.getByLabelText('delete-poll'));
+    await waitFor(() => expect(onDeleted).toHaveBeenCalled());
+    const deleteCall = fetchMock.mock.calls.find(
+      (c) => typeof c[1] === 'object' && (c[1] as RequestInit).method === 'DELETE',
+    );
+    expect(deleteCall).toBeDefined();
+    confirmSpy.mockRestore();
+  });
 });

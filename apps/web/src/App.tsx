@@ -23,6 +23,6 @@ export function App() {
     setRoute(getRoute());
   };
 
-  if (route.name === 'poll') return <PollPage id={route.id} />;
+  if (route.name === 'poll') return <PollPage id={route.id} onDeleted={() => navigate('/')} />;
   return <CreatePage onCreated={(id) => navigate(`/p/${id}`)} />;
 }

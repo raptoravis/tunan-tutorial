@@ -157,3 +157,23 @@ pollsRoute.post('/:id/votes', async (c) => {
 
   return c.json({ ok: true, option_id: body.option_id });
 });
+
+pollsRoute.delete('/:id', (c) => {
+  const id = c.req.param('id');
+  const db = getDb();
+  const poll = db
+    .prepare('SELECT owner_token FROM polls WHERE id = ?')
+    .get(id) as { owner_token: string } | undefined;
+  if (!poll) return c.json({ error: 'not_found' }, 404);
+
+  const ownerCookie = getCookie(c, OWNER_COOKIE);
+  if (!ownerCookie || ownerCookie !== poll.owner_token) {
+    return c.json({ error: 'forbidden' }, 403);
+  }
+
+  db.prepare('DELETE FROM votes WHERE poll_id = ?').run(id);
+  db.prepare('DELETE FROM poll_options WHERE poll_id = ?').run(id);
+  db.prepare('DELETE FROM polls WHERE id = ?').run(id);
+
+  return c.json({ ok: true });
+});

@@ -349,3 +349,62 @@ describe('GET /api/polls/:id tallies', () => {
     );
   });
 });
+
+describe('DELETE /api/polls/:id', () => {
+  beforeEach(() => resetDb());
+
+  async function createWithOwnerCookie(app: ReturnType<typeof createApp>) {
+    const r = await app.request('/api/polls', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ title: 't', options: ['a', 'b'] }),
+    });
+    const ownerCookie =
+      (r.headers.get('set-cookie') ?? '')
+        .split(',')
+        .find((c) => c.includes('owner_token'))
+        ?.split(';')[0] ?? '';
+    const { id } = await r.json();
+    return { id, ownerCookie };
+  }
+
+  it('T-D01 owner with owner_token can delete → 200, GET → 404 after', async () => {
+    const app = createApp();
+    const { id, ownerCookie } = await createWithOwnerCookie(app);
+
+    const del = await app.request(`/api/polls/${id}`, {
+      method: 'DELETE',
+      headers: { cookie: ownerCookie },
+    });
+    expect(del.status).toBe(200);
+
+    const view = await app.request(`/api/polls/${id}`);
+    expect(view.status).toBe(404);
+  });
+
+  it('T-D02 no owner_token cookie → 403', async () => {
+    const app = createApp();
+    const { id } = await createWithOwnerCookie(app);
+    const del = await app.request(`/api/polls/${id}`, { method: 'DELETE' });
+    expect(del.status).toBe(403);
+  });
+
+  it('T-D03 wrong owner_token → 403', async () => {
+    const app = createApp();
+    const { id } = await createWithOwnerCookie(app);
+    const del = await app.request(`/api/polls/${id}`, {
+      method: 'DELETE',
+      headers: { cookie: 'owner_token=bogus' },
+    });
+    expect(del.status).toBe(403);
+  });
+
+  it('T-D04 delete non-existent → 404', async () => {
+    const app = createApp();
+    const del = await app.request('/api/polls/doesnotexi', {
+      method: 'DELETE',
+      headers: { cookie: 'owner_token=anything' },
+    });
+    expect(del.status).toBe(404);
+  });
+});

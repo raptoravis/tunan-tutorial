@@ -1,11 +1,12 @@
 import { useEffect, useState, type FormEvent } from 'react';
-import { getPoll, castVote, type Poll } from '../api.js';
+import { getPoll, castVote, deletePoll, type Poll } from '../api.js';
 
 interface Props {
   id: string;
+  onDeleted?: () => void;
 }
 
-export function PollPage({ id }: Props) {
+export function PollPage({ id, onDeleted }: Props) {
   const [poll, setPoll] = useState<Poll | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [selected, setSelected] = useState<string | null>(null);
@@ -41,6 +42,17 @@ export function PollPage({ id }: Props) {
   const refresh = async () => {
     const p = await getPoll(id);
     setPoll(p);
+  };
+
+  const onDelete = async () => {
+    if (!window.confirm('确定删除这个投票？此操作不可撤销。')) return;
+    try {
+      await deletePoll(id);
+      if (onDeleted) onDeleted();
+      else window.location.href = '/';
+    } catch (e) {
+      setFormError(e instanceof Error ? e.message : '删除失败');
+    }
   };
 
   const onSubmit = async (e: FormEvent) => {
@@ -162,6 +174,19 @@ export function PollPage({ id }: Props) {
       <p style={{ color: '#999', fontSize: 12, marginTop: 24 }}>
         分享链接：{window.location.href}
       </p>
+
+      {poll.is_owner && (
+        <div style={{ marginTop: 12, paddingTop: 12, borderTop: '1px dashed #ccc' }}>
+          <button
+            type="button"
+            onClick={onDelete}
+            aria-label="delete-poll"
+            style={{ color: 'crimson', padding: '4px 10px', fontSize: 13 }}
+          >
+            删除投票
+          </button>
+        </div>
+      )}
     </main>
   );
 }

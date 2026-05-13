@@ -49,6 +49,17 @@ export async function getPoll(id: string): Promise<Poll> {
   return res.json();
 }
 
+export async function deletePoll(pollId: string): Promise<void> {
+  const res = await fetch(`/api/polls/${pollId}`, {
+    method: 'DELETE',
+    credentials: 'same-origin',
+  });
+  if (!res.ok) {
+    const body = await res.json().catch(() => ({}));
+    throw new Error(body.error ?? `delete_failed_${res.status}`);
+  }
+}
+
 export async function castVote(pollId: string, optionId: string): Promise<void> {
   const res = await fetch(`/api/polls/${pollId}/votes`, {
     method: 'POST',
