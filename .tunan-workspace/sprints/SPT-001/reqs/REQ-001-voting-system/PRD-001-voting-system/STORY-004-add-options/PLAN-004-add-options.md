@@ -2,7 +2,7 @@
 id: PLAN-004
 title: 参与者追加候选项 — 实现计划
 owner: raptoravis
-status: ready
+status: done
 created: 2026-05-13
 updated: 2026-05-13
 source_id: STORY-004

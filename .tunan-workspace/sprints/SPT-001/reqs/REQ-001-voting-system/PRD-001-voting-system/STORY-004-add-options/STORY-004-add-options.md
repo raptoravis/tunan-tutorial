@@ -2,7 +2,7 @@
 id: STORY-004
 title: 参与者可在允许追加的房间内添加新候选项
 owner: raptoravis
-status: ready
+status: done
 created: 2026-05-13
 updated: 2026-05-13
 source_id: PRD-001

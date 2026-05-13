@@ -2,7 +2,9 @@
 id: PR-004
 title: STORY-004 参与者追加候选项
 owner: raptoravis
-status: sponsor_wait
+status: merged
+merged_at: 2026-05-13T00:00:00Z
+merge_strategy: merge
 last_review: pass
 last_test: pass
 sponsor_approved: true
