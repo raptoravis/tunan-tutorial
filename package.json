@@ -1,0 +1,12 @@
+{
+  "name": "tunan-tutorial-voting",
+  "private": true,
+  "version": "0.0.1",
+  "packageManager": "pnpm@11.1.1",
+  "scripts": {
+    "dev:server": "pnpm -F server dev",
+    "dev:web": "pnpm -F web dev",
+    "test": "pnpm -F server test",
+    "build": "pnpm -r build"
+  }
+}
