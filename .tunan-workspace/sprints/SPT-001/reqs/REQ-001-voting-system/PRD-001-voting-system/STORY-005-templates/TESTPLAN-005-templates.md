@@ -3,7 +3,7 @@ id: TESTPLAN-005
 title: STORY-005 模板首页 测试
 owner: raptoravis
 source_id: PLAN-005
-status: ready
+status: done
 created: 2026-05-13
 updated: 2026-05-13
 priority: P2
