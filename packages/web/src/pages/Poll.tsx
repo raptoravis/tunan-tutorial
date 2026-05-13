@@ -11,6 +11,7 @@ export function Poll({ shortCode }: Props) {
   const [view, setView] = useState<View>("loading");
   const [poll, setPoll] = useState<PollDetail | null>(null);
   const [selected, setSelected] = useState<number | null>(null);
+  const [selectedMulti, setSelectedMulti] = useState<Set<number>>(new Set());
   const [errMsg, setErrMsg] = useState<string>("");
   const [submitting, setSubmitting] = useState(false);
   const [copied, setCopied] = useState(false);
@@ -41,19 +42,36 @@ export function Poll({ shortCode }: Props) {
 
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (selected === null || submitting) return;
+    if (submitting || !poll) return;
+    const ids =
+      poll.mode === "multi"
+        ? [...selectedMulti]
+        : selected !== null
+          ? [selected]
+          : [];
+    if (ids.length === 0) return;
     setSubmitting(true);
     try {
-      const r: VoteResponse = await vote(shortCode, [selected]);
-      if (poll) {
-        setPoll({ ...poll, totalVotes: r.totalVotes, results: r.results });
-      }
+      const r: VoteResponse = await vote(shortCode, ids);
+      setPoll({ ...poll, totalVotes: r.totalVotes, results: r.results });
       setView("results");
     } catch (e) {
       setErrMsg(e instanceof Error ? e.message : "投票失败");
       setSubmitting(false);
     }
   };
+
+  const toggleMulti = (id: number) => {
+    setSelectedMulti((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  };
+
+  const canSubmit =
+    poll?.mode === "multi" ? selectedMulti.size > 0 : selected !== null;
 
   if (view === "loading") return <p>加载中...</p>;
   if (view === "error") return <p role="alert">出错：{errMsg}</p>;
@@ -74,26 +92,41 @@ export function Poll({ shortCode }: Props) {
       {view === "voting" && (
         <form onSubmit={onSubmit}>
           <fieldset>
-            <legend className="sr-only">选项</legend>
-            {poll.options.map((o) => (
-              <label key={o.id} className="option-row">
-                <input
-                  type="radio"
-                  name="opt"
-                  value={o.id}
-                  checked={selected === o.id}
-                  onChange={() => setSelected(o.id)}
-                />
-                <span>{o.label}</span>
-              </label>
-            ))}
+            <legend className="sr-only">
+              {poll.mode === "multi" ? "选项（可多选）" : "选项（单选）"}
+            </legend>
+            {poll.options.map((o) =>
+              poll.mode === "multi" ? (
+                <label key={o.id} className="option-row">
+                  <input
+                    type="checkbox"
+                    name="opt"
+                    value={o.id}
+                    checked={selectedMulti.has(o.id)}
+                    onChange={() => toggleMulti(o.id)}
+                  />
+                  <span>{o.label}</span>
+                </label>
+              ) : (
+                <label key={o.id} className="option-row">
+                  <input
+                    type="radio"
+                    name="opt"
+                    value={o.id}
+                    checked={selected === o.id}
+                    onChange={() => setSelected(o.id)}
+                  />
+                  <span>{o.label}</span>
+                </label>
+              ),
+            )}
           </fieldset>
           {errMsg && (
             <p className="error" role="alert">
               {errMsg}
             </p>
           )}
-          <button type="submit" className="btn primary" disabled={selected === null || submitting}>
+          <button type="submit" className="btn primary" disabled={!canSubmit || submitting}>
             {submitting ? "提交中..." : "提交投票"}
           </button>
         </form>

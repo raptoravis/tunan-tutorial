@@ -115,8 +115,8 @@ export function createApp(db: DB) {
   app.post("/api/polls/:shortCode/vote", async (c) => {
     const code = c.req.param("shortCode");
     const poll = db
-      .prepare("SELECT id FROM polls WHERE short_code = ?")
-      .get(code) as { id: number } | undefined;
+      .prepare("SELECT id, mode FROM polls WHERE short_code = ?")
+      .get(code) as { id: number; mode: string } | undefined;
     if (!poll) return c.json({ error: "not_found" }, 404);
 
     let body: VoteBody;
@@ -133,6 +133,9 @@ export function createApp(db: DB) {
       .filter((x) => Number.isFinite(x));
 
     if (optionIds.length === 0) return c.json(bad("optionIds"), 400);
+    if (poll.mode === "single" && optionIds.length !== 1) {
+      return c.json(bad("optionIds"), 400);
+    }
 
     const placeholders = optionIds.map(() => "?").join(",");
     const owned = db

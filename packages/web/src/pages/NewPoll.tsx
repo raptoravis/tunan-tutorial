@@ -7,6 +7,7 @@ interface Props {
 
 export function NewPoll({ navigate }: Props) {
   const [title, setTitle] = useState("");
+  const [mode, setMode] = useState<"single" | "multi">("single");
   const [options, setOptions] = useState<string[]>(["", ""]);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -31,7 +32,7 @@ export function NewPoll({ navigate }: Props) {
       const res = await createPoll({
         title: title.trim(),
         options: trimmed,
-        mode: "single",
+        mode,
       });
       navigate(`/p/${res.shortCode}`);
     } catch (err) {
@@ -55,6 +56,30 @@ export function NewPoll({ navigate }: Props) {
         maxLength={120}
         required
       />
+
+      <fieldset>
+        <legend>投票方式</legend>
+        <label className="option-row">
+          <input
+            type="radio"
+            name="mode"
+            value="single"
+            checked={mode === "single"}
+            onChange={() => setMode("single")}
+          />
+          <span>单选</span>
+        </label>
+        <label className="option-row">
+          <input
+            type="radio"
+            name="mode"
+            value="multi"
+            checked={mode === "multi"}
+            onChange={() => setMode("multi")}
+          />
+          <span>多选</span>
+        </label>
+      </fieldset>
 
       <fieldset>
         <legend>选项（至少 2 项）</legend>
