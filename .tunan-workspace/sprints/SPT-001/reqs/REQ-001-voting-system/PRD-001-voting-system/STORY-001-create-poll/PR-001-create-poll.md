@@ -2,9 +2,12 @@
 id: PR-001
 title: STORY-001 创建投票（含 monorepo 脚手架）
 owner: raptoravis
-status: sponsor_wait
+status: merged
 created: 2026-05-13
 updated: 2026-05-13
+merged_at: 2026-05-13T07:53:16Z
+merged_sha: ad1b43c
+merge_strategy: merge
 last_review: pass
 last_review_at: 2026-05-13T07:49:45Z
 last_test: pass
