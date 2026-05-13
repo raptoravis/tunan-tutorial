@@ -6,7 +6,8 @@ source_id: TESTPLAN-002
 status: reviewing
 created: 2026-05-13
 updated: 2026-05-13
-gh_pr: TBD
+gh_pr: 13
+gh_url: https://github.com/raptoravis/tunan-tutorial/pull/13
 branch: tunan/dev/STORY-002-raptoravis
 base: test
 worktree: .tunan-workspace/worktrees/STORY-002-raptoravis
