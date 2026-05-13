@@ -1,0 +1,13 @@
+{
+  "name": "tunan-tutorial",
+  "private": true,
+  "packageManager": "pnpm@11.1.1",
+  "engines": {
+    "node": ">=22.5.0"
+  },
+  "scripts": {
+    "dev:server": "pnpm -F @tunan/server dev",
+    "dev:web": "pnpm -F @tunan/web dev",
+    "test": "pnpm -r test"
+  }
+}
