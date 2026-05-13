@@ -1,10 +1,19 @@
 import { DatabaseSync } from 'node:sqlite';
 
 let db: DatabaseSync | null = null;
+let dbPath: string = ':memory:';
+
+export function setDbPath(p: string): void {
+  dbPath = p;
+  if (db) {
+    db.close();
+    db = null;
+  }
+}
 
 export function getDb(): DatabaseSync {
   if (!db) {
-    db = new DatabaseSync(':memory:');
+    db = new DatabaseSync(dbPath);
     db.exec(SCHEMA);
   }
   return db;
