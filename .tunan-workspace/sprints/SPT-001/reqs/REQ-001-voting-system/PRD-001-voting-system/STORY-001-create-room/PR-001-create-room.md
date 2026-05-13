@@ -2,7 +2,7 @@
 id: PR-001
 title: STORY-001 创建投票房间端到端
 owner: raptoravis
-status: reviewing
+status: sponsor_wait
 created: 2026-05-13
 updated: 2026-05-13
 source_id: TESTPLAN-001
@@ -10,6 +10,11 @@ gh_pr: 23
 branch: tunan/dev/STORY-001-raptoravis-v3
 base: test
 worktree: .tunan-workspace/worktrees/STORY-001-raptoravis-v3
+last_review: pass
+last_test: pass
+sponsor_approved: true
+sponsor_approved_by: pre_auth
+sponsor_approved_at: 2026-05-13T00:00:00Z
 pre_auth:
   by: raptoravis
   at: 2026-05-13T00:00:00Z
