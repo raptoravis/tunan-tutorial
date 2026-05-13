@@ -2,7 +2,7 @@
 id: PR-004
 title: STORY-004 创建页模板按钮
 owner: raptoravis
-status: sponsor_wait
+status: merged
 created: 2026-05-13
 updated: 2026-05-13
 source_id: TESTPLAN-004

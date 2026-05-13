@@ -2,7 +2,7 @@
 id: STORY-004
 title: 创建页模板按钮（旅游目的地 / 中饭吃啥）
 owner: raptoravis
-status: ready
+status: done
 created: 2026-05-13
 updated: 2026-05-13
 source_id: PRD-001
