@@ -2,7 +2,7 @@
 id: PR-003
 title: STORY-003 实时结果
 owner: raptoravis
-status: sponsor_wait
+status: merged
 created: 2026-05-13
 updated: 2026-05-13
 source_id: TESTPLAN-003
