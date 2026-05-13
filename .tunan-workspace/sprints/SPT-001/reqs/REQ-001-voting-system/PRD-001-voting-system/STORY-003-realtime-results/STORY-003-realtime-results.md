@@ -2,7 +2,7 @@
 id: STORY-003
 title: 投票页实时显示总参与人数和每项票数
 owner: raptoravis
-status: ready
+status: done
 created: 2026-05-13
 updated: 2026-05-13
 source_id: PRD-001
