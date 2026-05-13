@@ -3,12 +3,13 @@ id: STORY-002
 title: 创建投票（API + 创建页）
 owner: raptoravis
 source_id: PRD-001
-status: ready
+status: done
 created: 2026-05-13
 updated: 2026-05-13
 priority: P0
 estimate: M
 blocked_by: [STORY-001]
+merged_pr: 16
 ---
 
 # STORY-002 — 创建投票
