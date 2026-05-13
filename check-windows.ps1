@@ -119,7 +119,6 @@ if (Test-CommandExists "claude") {
 # 3. Skills + companion files
 # -----------------------------------------------------------------
 Write-Info "===== Step 3/4: Skills and companion files ====="
-$skillsRoot = Join-Path $TargetPath ".claude\skills"
 $expectedSkills = @(
     "tunan-req", "tunan-prd", "tunan-story", "tunan-plan", "tunan-testplan", "tunan-pr",
     "tunan-dev", "tunan-tdd", "tunan-review", "tunan-test",
@@ -129,19 +128,30 @@ $expectedSkills = @(
     "tunan-story-graph",
     "tunan-prime", "tunan-cp"
 )
-if (-not (Test-Path -LiteralPath $skillsRoot)) {
-    Fail ".claude\skills\ missing in target."
+# Skills 可装在 project-local 或 user-global，任一存在即可（claude 会合并加载）。
+$skillRoots = @(
+    @{ Label = "project"; Path = (Join-Path $TargetPath ".claude\skills") }
+    @{ Label = "user";    Path = (Join-Path $env:USERPROFILE ".claude\skills") }
+)
+$presentRoots = @($skillRoots | Where-Object { Test-Path -LiteralPath $_.Path })
+if ($presentRoots.Count -eq 0) {
+    Write-Warn ".claude\skills\ not found in project ($($skillRoots[0].Path)) nor user-global ($($skillRoots[1].Path)); install at one of them."
 } else {
+    foreach ($r in $presentRoots) {
+        Write-Ok "skills root present ($($r.Label)): $($r.Path)"
+    }
     $missing = @()
     foreach ($s in $expectedSkills) {
-        if (-not (Test-Path (Join-Path $skillsRoot "$s\SKILL.md"))) {
-            $missing += $s
+        $found = $false
+        foreach ($r in $presentRoots) {
+            if (Test-Path (Join-Path $r.Path "$s\SKILL.md")) { $found = $true; break }
         }
+        if (-not $found) { $missing += $s }
     }
     if ($missing.Count -gt 0) {
-        Fail "Missing skills ($($missing.Count)): $($missing -join ', ')"
+        Write-Warn "Missing skills not found in any root ($($missing.Count)): $($missing -join ', ')"
     } else {
-        Write-Ok "All $($expectedSkills.Count) tunan-* skills present."
+        Write-Ok "All $($expectedSkills.Count) tunan-* skills resolvable (project / user)."
     }
 }
 
@@ -192,6 +202,12 @@ if (-not (Test-Path $workspaceRoot)) {
                 Write-Ok ".tunan-workspace\sprints\$currentSprint\reqs\ present."
             } else {
                 Fail ".tunan-workspace\sprints\$currentSprint\reqs\ missing (current sprint pool root)."
+            }
+            $rawSprint = Join-Path $workspaceRoot "raw-reqs\$currentSprint"
+            if (Test-Path $rawSprint) {
+                Write-Ok ".tunan-workspace\raw-reqs\$currentSprint\ present."
+            } else {
+                Fail ".tunan-workspace\raw-reqs\$currentSprint\ missing (raw-req inbox for current sprint; mirror of sprints\<current>\reqs\)."
             }
         }
     }

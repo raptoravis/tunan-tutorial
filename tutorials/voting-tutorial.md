@@ -12,7 +12,7 @@
 ## 前置
 
 - 在仓库根跑 `./check-windows.ps1`（Windows）或 `./check.sh`（macOS/Linux）输出 **All checks passed**
-  - 校验内容：前置 CLI、3 MCP、25 个 tunan-* skill、`.tunan-workspace/{worktrees,retro,raw-reqs,sprints/<current>/reqs}` + `settings.md`、`USER.md`、`tutorials/`、`gh` 已登录
+  - 校验内容：前置 CLI、3 MCP、26 个 tunan-* skill、`.tunan-workspace/{worktrees,retro,raw-reqs/<current>,sprints/<current>/reqs}` + `settings.md`、`USER.md`、`tutorials/`、`gh` 已登录
   - 任一红色 `[ERROR]` 都先解决再继续
 - 当前 git user 即是 sponsor 的 owner 名
 
@@ -20,7 +20,7 @@
 
 ---
 
-## skill 全景（25 个）
+## skill 全景（26 个）
 
 按职责分四组：
 
@@ -29,9 +29,9 @@
 | **主链路 6 站** | tunan-req / tunan-prd / tunan-story / tunan-plan / tunan-testplan / tunan-dev | 把 raw-req MD 文件逐站推到代码                       |
 | **PR 闭环**    | tunan-pr / tunan-review / tunan-test / tunan-tdd / tunan-merge / tunan-verify | PR 自驱动 + 合并后验收                              |
 | **入口 / 接管 / 失败**| tunan-triage / tunan-diagnose / tunan-pr-resolve / tunan-takeover / tunan-grill | 批量分诊 issue / bug 诊断 / PR 卡死 / 接手他人 / 追问模糊 |
-| **横切元工具** | tunan-prime / tunan-align / tunan-cp / tunan-parallel-pick / tunan-story-graph / tunan-retro / tunan-improve-arch / **tunan-pipeline** | 看现状 / 对齐 / 提交推送 / 并行拣选 / 依赖图 / 回顾 / 架构反思 / **一键全流程** |
+| **横切元工具** | tunan-prime / tunan-align / tunan-cp / tunan-parallel-pick / tunan-story-graph / tunan-retro / tunan-improve-arch / tunan-rawreq-organize / **tunan-pipeline** | 看现状 / 对齐 / 提交推送 / 并行拣选 / 依赖图 / 回顾 / 架构反思 / raw-req 整理 / **一键全流程** |
 
-> **一键全流程**：信任默认时，先在 `.tunan-workspace/raw-reqs/` 下写一份原始需求 MD，再 `/tunan-pipeline <raw-req.md>`，它会把下面的步骤 1-9 串起来，每个对齐点应用"全部默认"或显式 `--pre-auth`。本教程仍按"分站手动"走，便于看清每环职责。
+> **一键全流程**：信任默认时，先在 `.tunan-workspace/raw-reqs/<current_sprint>/` 下写一份原始需求 MD，再 `/tunan-pipeline <raw-req.md>`，它会把下面的步骤 1-9 串起来，每个对齐点应用"全部默认"或显式 `--pre-auth`。本教程仍按"分站手动"走，便于看清每环职责。
 
 ### skill / 开关覆盖速查
 
@@ -39,7 +39,7 @@
 
 | skill | 本教程覆盖方式 | 调用 / 开关说明 |
 |---|---|---|
-| `tunan-req` | 步骤 1、1b、10 实跑 | `/tunan-req <raw-req.md>` 默认形态，必须传 `.tunan-workspace/raw-reqs/` 下的 MD 文件路径；`--from-issue <#>` 从 GitHub issue 入池（issue 正文自动落档到 `raw-reqs/`）；`--from-conversation` **显式**从当前会话抽取（必须显式指定，不再缺省）；默认开启 research，`--no-research` 关闭调研；`--kind=feature\|bug\|chore` 指定类型；`--id=<REQ-NNN>` 指定 id；`--owner=<name>` 指定 owner。想"一路推到 verify" 走 `/tunan-pipeline <raw-req.md>`。 |
+| `tunan-req` | 步骤 1、1b、10 实跑 | `/tunan-req <raw-req.md>` 默认形态，必须传 `.tunan-workspace/raw-reqs/<current_sprint>/` 下的 MD 文件路径；`--from-issue <#>` 从 GitHub issue 入池（issue 正文自动落档到 `raw-reqs/<current_sprint>/`）；`--from-conversation` **显式**从当前会话抽取（必须显式指定，不再缺省）；默认开启 research，`--no-research` 关闭调研；`--kind=feature\|bug\|chore` 指定类型；`--id=<REQ-NNN>` 指定 id；`--owner=<name>` 指定 owner。想"一路推到 verify" 走 `/tunan-pipeline <raw-req.md>`。 |
 | `tunan-prd` | 步骤 2、11-15 实跑 | `/tunan-prd` pop-next；`/tunan-prd <REQ-id>` 指定 REQ；`list [--all-owners] [--status=...]` 看 PRD 池；`show/block/unblock` 维护条目；`--from=<REQ-id>` 等价位置参数；`--id=<PRD-id>` 指定生成 id。 |
 | `tunan-story` | 步骤 3、11-15 实跑 | `/tunan-story` pop-next；`/tunan-story <PRD-id>` 指定 PRD；`list/show/block/unblock` 维护 STORY 池；`--target-count=<n>` 指定目标拆分数量；`--id-base=<STORY-NNN>` 指定起始 id。 |
 | `tunan-story-graph` | 步骤 3 实跑默认 ASCII | `/tunan-story-graph <PRD-id>` 输出 ASCII；`--mermaid` 输出 Mermaid；`--all-owners` 不限 owner。纯只读，只画 STORY 粒度。 |
@@ -63,6 +63,7 @@
 | `tunan-parallel-pick` | 步骤 3 实跑默认建议 | `/tunan-parallel-pick` 默认 STORY 池只读建议；`--pool=plan` 换池；`--max=N` 限数量；`--owner=any` 不限 owner；`--queue [--max=N]` 顺序自动跑一批；`--queue --resume` 续做中断队列。 |
 | `tunan-retro` | 步骤 16 实跑 | `/tunan-retro` 通用复盘；`/tunan-retro <REQ-id\|PR-id>` 围绕事件；`--since=<YYYY-MM-DD>` 按时间窗复盘。改 skill 必须展示 diff 后二次确认。 |
 | `tunan-improve-arch` | 进阶段落说明 | `/tunan-improve-arch` 通用架构扫描；`--area=<path>` 限定子树；`--from-retros` 只基于 retro 历史推导。只产出新 REQ，不当场改代码。 |
+| `tunan-rawreq-organize` | 步骤 1 预备说明 | `/tunan-rawreq-organize` 默认整理 `current_sprint` 下所有 raw-req MD；`<sprint-id>` 指定 sprint；`<raw-req.md 路径>` 只整理单个 MD 及其引用图；`--dry-run` 只看计划不动文件；`--no-vision` 不调 vision，按出现顺序产 `fig-N` 名。把每个 raw-req MD 连同它引用的截图下沉到与 MD 同名子目录，截图改为语义化 kebab-case 名，MD 引用路径同步改写；孤儿图（无 MD 引用）不动；不自动 commit。 |
 | `tunan-pipeline` | 全景说明、调试备忘说明 | `/tunan-pipeline <raw-req.md>` 默认形态，从 raw-req MD 文件全链路；`--from-issue <#>` 从 issue；`--from-conversation` 显式从当前对话抽取（必须显式指定）；`<REQ-id>` 从已有 REQ 续推；`--stop-at=plan` 到 PLAN 停；`--no-merge` 到 sponsor_wait 停；`--pre-auth` 预授权 TDD red-gate + PR LGTM；`--story-limit=N` 防 STORY 爆炸；`--watch-pr` 起 PR 后自动 watch；`--parallel` 调并行拣选；`--abort` 中止流水线。 |
 
 ---
@@ -79,19 +80,21 @@ sponsor> /tunan-prime
 
 ### 步骤 1 · 从 raw-req MD 文件生成 REQ（缺省 --research）
 
-先在 workspace 里落一份原始需求草稿（鼓励 sponsor 把"一句话"展开成可被自己/他人重读的初稿，统一进 `raw-reqs/` 留痕，可 grep / git blame）：
+先在 workspace 里落一份原始需求草稿（鼓励 sponsor 把"一句话"展开成可被自己/他人重读的初稿，统一进 `raw-reqs/<current_sprint>/` 留痕，与 `sprints/<current_sprint>/reqs/` 按 sprint 同构，可 grep / git blame）：
 
 ```
-sponsor> mkdir -p .tunan-workspace/raw-reqs
-sponsor> cat > .tunan-workspace/raw-reqs/2026-05-12-voting-system.md <<'EOF'
+sponsor> mkdir -p .tunan-workspace/raw-reqs/SPT-001
+sponsor> cat > .tunan-workspace/raw-reqs/SPT-001/2026-05-12-voting-system.md <<'EOF'
 我想做一个投票系统：可以投票去哪里旅游 / 中饭吃什么。
 （这里随便展开几句你能想到的细节：截止时间？单选/多选？匿名/实名？……
  想不清也没关系，留给 research + align 帮你补。）
 EOF
-sponsor> /tunan-req .tunan-workspace/raw-reqs/2026-05-12-voting-system.md
+sponsor> /tunan-req .tunan-workspace/raw-reqs/SPT-001/2026-05-12-voting-system.md
 ```
 
 > 不想写文件，确实只想从对话抽取？显式 `--from-conversation`；默认不再静默 fallback 到对话。
+>
+> 如果 raw-req MD 里贴了一堆 `msedge_*.jpg` / `Screenshot 2026-...png` 这类无意义文件名的截图，先跑 `/tunan-rawreq-organize` —— 它会把每个 MD 连同它引用的图下沉到同名子目录、截图改成语义化 kebab-case 名、MD 内引用路径同步改写。整理后再 `/tunan-req <子目录>/<slug>.md`。
 
 预期：
 - claude **开始**播报"将走 1) 抽取 2) research 3) top3 4) 入池"
@@ -110,12 +113,12 @@ sponsor> 全部默认
 ```
 
 预期：
-- 写入 `.tunan-workspace/sprints/SPT-001/reqs/REQ-002-voting-system/REQ-002-voting-system.md`，`status: ready`（sprint 由 `settings.md.current_sprint` 决定）
-- 结束播报：推荐 `/tunan-prd REQ-002` / `/tunan-cp` / `/tunan-prime`
+- 写入 `.tunan-workspace/sprints/SPT-001/reqs/REQ-001-voting-system/REQ-001-voting-system.md`，`status: ready`（sprint 由 `settings.md.current_sprint` 决定）
+- 结束播报：推荐 `/tunan-prd REQ-001` / `/tunan-cp` / `/tunan-prime`
 
 ### 步骤 1b · （可选）从 issue 生成 REQ
 
-如果你不想自己写 raw-req 文件，可以先在 GitHub 开 issue（issue 正文会自动落档一份到 `.tunan-workspace/raw-reqs/<YYYY-MM-DD>-issue-<#>.md`）：
+如果你不想自己写 raw-req 文件，可以先在 GitHub 开 issue（issue 正文会自动落档一份到 `.tunan-workspace/raw-reqs/<current_sprint>/<YYYY-MM-DD>-issue-<#>.md`）：
 
 ```
 sponsor> gh issue create --title "投票系统：吃饭/旅游目的地" --body "..."
@@ -127,11 +130,11 @@ sponsor> /tunan-req --from-issue 1
 ### 步骤 2 · REQ → PRD
 
 ```
-sponsor> /tunan-prd REQ-002
+sponsor> /tunan-prd REQ-001
 ```
 
 预期：
-- 弹 REQ-002，置 in_progress
+- 弹 REQ-001，置 in_progress
 - 起草 PRD：把 6 个决议映射到 FR；提 a11y / 性能 NFR（research 发现 + sponsor 没明说的进 Open Questions）
 - 内调 align：Persona 取舍 / NFR 阈值 / 是否纳入"防刷票更强机制"
 
@@ -139,12 +142,12 @@ sponsor> /tunan-prd REQ-002
 sponsor> 全部默认
 ```
 
-预期：写入 `<REQ-dir>/PRD-002-voting-system/PRD-002-voting-system.md`，status=ready；推荐 `/tunan-story PRD-002`。
+预期：写入 `<REQ-dir>/PRD-001-voting-system/PRD-001-voting-system.md`，status=ready；推荐 `/tunan-story PRD-001`。
 
 ### 步骤 3 · PRD → STORY 拆分
 
 ```
-sponsor> /tunan-story PRD-002
+sponsor> /tunan-story PRD-001
 ```
 
 预期：
@@ -163,13 +166,13 @@ sponsor> /tunan-story PRD-002
 sponsor> 全部默认
 ```
 
-预期：5 个 `<PRD-dir>/STORY-NNN-*/STORY-NNN-*.md` 落盘，`source_id: PRD-002`，依赖图：
+预期：5 个 `<PRD-dir>/STORY-NNN-*/STORY-NNN-*.md` 落盘，`source_id: PRD-001`，依赖图：
 - 002 blocked_by 001
 - 003 blocked_by 002
 - 004/005 blocked_by 002
 
 ```
-sponsor> /tunan-story-graph PRD-002
+sponsor> /tunan-story-graph PRD-001
 ```
 
 预期：ASCII 树状依赖图（可加 `--mermaid` 贴 GitHub）。看清哪些 STORY 已 done、哪些可以**并行**起：
@@ -274,7 +277,7 @@ sponsor> /tunan-pr PR-001
 预期：
 - checkout dev
 - 跑 TESTPLAN-001 全部用例 → 全过
-- 链路状态级联：PLAN-001/STORY-001 done；PRD-002/REQ-002 仍 in_progress（等其余 STORY 走完）
+- 链路状态级联：PLAN-001/STORY-001 done；PRD-001/REQ-001 仍 in_progress（等其余 STORY 走完）
 - 结束播报：推荐 `/tunan-plan STORY-002`（依赖根已解锁）
 
 > 重复步骤 4-9 走 STORY-002..005，黄金路径完结。
@@ -405,10 +408,10 @@ sponsor> /tunan-improve-arch --from-retros
 ```
 settings.md                                                # current_sprint: SPT-001
 sprints/SPT-001/reqs/
-  REQ-002-voting-system/
-    REQ-002-voting-system.md                               (done)
-    PRD-002-.../
-      PRD-002-...md                                        (done)
+  REQ-001-voting-system/
+    REQ-001-voting-system.md                               (done)
+    PRD-001-.../
+      PRD-001-...md                                        (done)
       STORY-001..005-.../
         STORY-NNN-*.md / PLAN-NNN-*.md / TESTPLAN-NNN-*.md / PR-NNN-*.md (全 done)
   REQ-003-vote-count-not-refresh/                          (kind:bug)
@@ -434,7 +437,8 @@ skill 改动：`.claude/skills/tunan-testplan/SKILL.md` 在 Persona 模板加了
 - PR 自驱动卡在 reviewing → `/tunan-pr <id>` 再调一次；或 `--watch`
 - PR 状态 failed / 合并冲突 / CI 红 / 评论挤压不收敛 → `/tunan-pr-resolve <PR-id>`（必要时 `--rebase` 或 `--abandon`）
 - 想中断流程 → 手 `git status` 看；不要硬 reset，先看 PR 池条目 status
-- 想一键跑全流程而不是分站 → 先写一份 `.tunan-workspace/raw-reqs/<YYYY-MM-DD>-<slug>.md`，再 `/tunan-pipeline <raw-req.md>`（参 skill 全景表）
+- 想一键跑全流程而不是分站 → 先写一份 `.tunan-workspace/raw-reqs/<current_sprint>/<YYYY-MM-DD>-<slug>.md`，再 `/tunan-pipeline <raw-req.md>`（参 skill 全景表）
+- raw-reqs 目录里截图名一团乱（`msedge_*.jpg`、`image123.png`） → `/tunan-rawreq-organize`，可加 `--dry-run` 先看计划
 
 ---
 
