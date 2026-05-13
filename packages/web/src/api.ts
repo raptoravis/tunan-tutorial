@@ -2,6 +2,7 @@ export interface CreatePollInput {
   title: string;
   options: string[];
   mode: "single" | "multi";
+  deadline?: string | null;
 }
 
 export interface CreatePollResponse {
@@ -27,6 +28,7 @@ export interface PollDetail {
   shortCode: string;
   title: string;
   mode: "single" | "multi";
+  deadlineAt: string | null;
   options: PollOption[];
   totalVotes: number;
   results: ResultEntry[];

@@ -9,6 +9,7 @@ interface CreateBody {
   title?: unknown;
   options?: unknown;
   mode?: unknown;
+  deadline?: unknown;
 }
 
 interface VoteBody {
@@ -54,6 +55,15 @@ export function createApp(db: DB) {
     }
     const mode = body.mode === "multi" ? "multi" : "single";
 
+    let deadlineIso: string | null = null;
+    if (typeof body.deadline === "string" && body.deadline.length > 0) {
+      const d = new Date(body.deadline);
+      if (Number.isNaN(d.getTime())) {
+        return c.json(bad("deadline"), 400);
+      }
+      deadlineIso = d.toISOString();
+    }
+
     // 3 retries on shortcode collision
     let shortCode = "";
     let pollId = 0;
@@ -61,9 +71,9 @@ export function createApp(db: DB) {
       shortCode = genShortCode();
       try {
         const ins = db.prepare(
-          "INSERT INTO polls (short_code, title, mode) VALUES (?, ?, ?)",
+          "INSERT INTO polls (short_code, title, mode, deadline_at) VALUES (?, ?, ?, ?)",
         );
-        const res = ins.run(shortCode, title, mode);
+        const res = ins.run(shortCode, title, mode, deadlineIso);
         pollId = Number(res.lastInsertRowid);
         break;
       } catch {
@@ -90,7 +100,7 @@ export function createApp(db: DB) {
     const poll = db
       .prepare("SELECT * FROM polls WHERE short_code = ?")
       .get(code) as
-      | { id: number; short_code: string; title: string; mode: string; created_at: string }
+      | { id: number; short_code: string; title: string; mode: string; deadline_at: string | null; created_at: string }
       | undefined;
     if (!poll) return c.json({ error: "not_found" }, 404);
 
@@ -106,6 +116,7 @@ export function createApp(db: DB) {
       shortCode: poll.short_code,
       title: poll.title,
       mode: poll.mode,
+      deadlineAt: poll.deadline_at,
       createdAt: poll.created_at,
       options,
       totalVotes: agg.totalVotes,
@@ -116,9 +127,13 @@ export function createApp(db: DB) {
   app.post("/api/polls/:shortCode/vote", async (c) => {
     const code = c.req.param("shortCode");
     const poll = db
-      .prepare("SELECT id, mode FROM polls WHERE short_code = ?")
-      .get(code) as { id: number; mode: string } | undefined;
+      .prepare("SELECT id, mode, deadline_at FROM polls WHERE short_code = ?")
+      .get(code) as { id: number; mode: string; deadline_at: string | null } | undefined;
     if (!poll) return c.json({ error: "not_found" }, 404);
+
+    if (poll.deadline_at && new Date(poll.deadline_at).getTime() <= Date.now()) {
+      return c.json({ error: "poll_closed" }, 423);
+    }
 
     let body: VoteBody;
     try {
