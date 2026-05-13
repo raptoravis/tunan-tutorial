@@ -1,28 +1,25 @@
 import React from 'react';
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect } from 'vitest';
 import { render, screen, waitFor } from '@testing-library/react';
+import { MemoryRouter } from 'react-router-dom';
 import { App } from './App.js';
 
 describe('<App/>', () => {
-  beforeEach(() => {
-    vi.restoreAllMocks();
-  });
-
-  it('renders title and shows API: ok when /api/health succeeds', async () => {
-    vi.stubGlobal(
-      'fetch',
-      vi.fn().mockResolvedValue({
-        json: async () => ({ ok: true }),
-      }),
+  it('renders title heading on any route', () => {
+    render(
+      <MemoryRouter initialEntries={['/']}>
+        <App />
+      </MemoryRouter>,
     );
-    render(<App />);
     expect(screen.getByRole('heading', { name: 'Voting System' })).toBeTruthy();
-    await waitFor(() => expect(screen.getByText('API: ok')).toBeTruthy());
   });
 
-  it('shows API: error when fetch rejects', async () => {
-    vi.stubGlobal('fetch', vi.fn().mockRejectedValue(new Error('boom')));
-    render(<App />);
-    await waitFor(() => expect(screen.getByText('API: error')).toBeTruthy());
+  it('routes "/" to CreatePoll form', async () => {
+    render(
+      <MemoryRouter initialEntries={['/']}>
+        <App />
+      </MemoryRouter>,
+    );
+    await waitFor(() => expect(screen.getByPlaceholderText(/标题/)).toBeTruthy());
   });
 });

@@ -1,21 +1,16 @@
-import React, { useEffect, useState } from 'react';
-
-type Status = 'loading' | 'ok' | 'error';
+import React from 'react';
+import { Routes, Route } from 'react-router-dom';
+import { CreatePoll } from './CreatePoll.js';
+import { PollPage } from './PollPage.js';
 
 export function App() {
-  const [status, setStatus] = useState<Status>('loading');
-
-  useEffect(() => {
-    fetch('/api/health')
-      .then((r) => r.json())
-      .then((j: { ok: boolean }) => setStatus(j.ok ? 'ok' : 'error'))
-      .catch(() => setStatus('error'));
-  }, []);
-
   return (
     <main>
       <h1>Voting System</h1>
-      <p>API: {status}</p>
+      <Routes>
+        <Route path="/" element={<CreatePoll />} />
+        <Route path="/poll/:id" element={<PollPage />} />
+      </Routes>
     </main>
   );
 }
