@@ -147,3 +147,124 @@ describe('GET /api/polls/:id', () => {
     expect((await guestView.json()).is_owner).toBe(false);
   });
 });
+
+async function createPoll(app: ReturnType<typeof createApp>, body: Record<string, unknown>) {
+  const r = await app.request('/api/polls', {
+    method: 'POST',
+    headers: { 'content-type': 'application/json' },
+    body: JSON.stringify(body),
+  });
+  const data = await r.json();
+  return { id: data.id as string };
+}
+
+async function getOptions(app: ReturnType<typeof createApp>, pollId: string) {
+  const r = await app.request(`/api/polls/${pollId}`);
+  const data = await r.json();
+  return data.options as Array<{ id: string; label: string }>;
+}
+
+describe('POST /api/polls/:id/votes', () => {
+  beforeEach(() => resetDb());
+
+  it('T-V01 happy path: 200 + your_option_id reflects', async () => {
+    const app = createApp();
+    const { id } = await createPoll(app, { title: 't', options: ['a', 'b'] });
+    const opts = await getOptions(app, id);
+    const res = await app.request(`/api/polls/${id}/votes`, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ option_id: opts[0].id }),
+    });
+    expect(res.status).toBe(200);
+    const voterCookie = (res.headers.get('set-cookie') ?? '').split(',').find((c) => c.includes('voter_id'))?.split(';')[0] ?? '';
+    const view = await app.request(`/api/polls/${id}`, { headers: { cookie: voterCookie } });
+    expect((await view.json()).your_option_id).toBe(opts[0].id);
+  });
+
+  it('T-V02 option_id not in this poll → 400', async () => {
+    const app = createApp();
+    const { id: p1 } = await createPoll(app, { title: 't1', options: ['a', 'b'] });
+    const { id: p2 } = await createPoll(app, { title: 't2', options: ['c', 'd'] });
+    const p2opts = await getOptions(app, p2);
+    const res = await app.request(`/api/polls/${p1}/votes`, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ option_id: p2opts[0].id }),
+    });
+    expect(res.status).toBe(400);
+  });
+
+  it('T-V03 poll not found → 404', async () => {
+    const app = createApp();
+    const res = await app.request('/api/polls/doesnotexi/votes', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ option_id: 'whatever' }),
+    });
+    expect(res.status).toBe(404);
+  });
+
+  it('T-V04 deadline passed → 409', async () => {
+    const app = createApp();
+    const past = new Date(Date.now() - 1000).toISOString();
+    const { id } = await createPoll(app, { title: 't', options: ['a', 'b'], deadline_at: past });
+    const opts = await getOptions(app, id);
+    const res = await app.request(`/api/polls/${id}/votes`, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ option_id: opts[0].id }),
+    });
+    expect(res.status).toBe(409);
+  });
+
+  it('T-V05 changing vote overwrites, not stacks', async () => {
+    const app = createApp();
+    const { id } = await createPoll(app, { title: 't', options: ['a', 'b', 'c'] });
+    const opts = await getOptions(app, id);
+
+    const r1 = await app.request(`/api/polls/${id}/votes`, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ option_id: opts[0].id }),
+    });
+    const voterCookie = (r1.headers.get('set-cookie') ?? '').split(',').find((c) => c.includes('voter_id'))?.split(';')[0] ?? '';
+
+    const r2 = await app.request(`/api/polls/${id}/votes`, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json', cookie: voterCookie },
+      body: JSON.stringify({ option_id: opts[1].id }),
+    });
+    expect(r2.status).toBe(200);
+
+    const view = await app.request(`/api/polls/${id}`, { headers: { cookie: voterCookie } });
+    expect((await view.json()).your_option_id).toBe(opts[1].id);
+  });
+
+  it('T-V06 GET your_option_id: cookie 缺失 → null', async () => {
+    const app = createApp();
+    const { id } = await createPoll(app, { title: 't', options: ['a', 'b'] });
+    const view = await app.request(`/api/polls/${id}`);
+    expect((await view.json()).your_option_id).toBeNull();
+  });
+
+  it('T-V07 GET closed=true after deadline', async () => {
+    const app = createApp();
+    const past = new Date(Date.now() - 1000).toISOString();
+    const { id } = await createPoll(app, { title: 't', options: ['a', 'b'], deadline_at: past });
+    const view = await app.request(`/api/polls/${id}`);
+    const body = await view.json();
+    expect(body.closed).toBe(true);
+  });
+
+  it('T-V08 missing option_id → 400', async () => {
+    const app = createApp();
+    const { id } = await createPoll(app, { title: 't', options: ['a', 'b'] });
+    const res = await app.request(`/api/polls/${id}/votes`, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({}),
+    });
+    expect(res.status).toBe(400);
+  });
+});
