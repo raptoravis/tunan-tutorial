@@ -2,7 +2,7 @@
 id: PLAN-001
 title: 创建投票 PLAN（含 monorepo 脚手架）
 owner: raptoravis
-status: ready
+status: done
 created: 2026-05-13
 updated: 2026-05-13
 source_id: STORY-001

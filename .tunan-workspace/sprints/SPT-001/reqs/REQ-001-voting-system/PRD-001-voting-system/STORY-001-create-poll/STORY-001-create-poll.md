@@ -2,7 +2,7 @@
 id: STORY-001
 title: 创建投票（标题 + 候选项 + 可选截止时间）
 owner: raptoravis
-status: in_progress
+status: done
 created: 2026-05-13
 updated: 2026-05-13
 source_id: PRD-001
