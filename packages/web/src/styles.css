@@ -100,3 +100,9 @@ button:disabled { opacity: 0.5; cursor: not-allowed; }
   white-space: nowrap;
   border: 0;
 }
+
+.options { list-style: none; padding: 0; margin: 0; }
+.options li { margin: 6px 0; }
+.options label { display: inline-flex; align-items: center; gap: 8px; font-weight: 400; cursor: pointer; }
+.options input[type="checkbox"] { width: 18px; height: 18px; }
+fieldset[disabled] { opacity: 0.6; }

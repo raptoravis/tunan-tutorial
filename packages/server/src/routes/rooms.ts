@@ -2,6 +2,7 @@ import { Hono } from 'hono';
 import { getDb } from '../db.ts';
 import { newRoomId, newAdminToken, hashToken } from '../lib/id.ts';
 import { validateCreateRoom } from '../lib/validate.ts';
+import { getOrIssuePt } from '../lib/participant.ts';
 
 export const rooms = new Hono();
 
@@ -73,6 +74,7 @@ rooms.get('/api/rooms/:id', (c) => {
   if (!row) {
     return c.json({ error: '房间不存在' }, 404);
   }
+  getOrIssuePt(c);
   const opts = db
     .prepare(
       'SELECT id, label FROM options WHERE room_id = ? AND deleted_at IS NULL ORDER BY id',

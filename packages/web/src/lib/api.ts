@@ -10,20 +10,69 @@ export type CreateRoomResponse = {
   url: string;
 };
 
+export type RoomOption = {
+  id: number;
+  label: string;
+};
+
+export type Room = {
+  id: string;
+  title: string;
+  allow_add: boolean;
+  created_at: string;
+  closed_at: string | null;
+  options: RoomOption[];
+};
+
 export type ApiError = {
   error: string;
   field?: string;
 };
 
+async function jsonOrThrow<T>(res: Response): Promise<T> {
+  if (!res.ok) {
+    let err: ApiError = { error: `HTTP ${res.status}` };
+    try {
+      err = (await res.json()) as ApiError;
+    } catch {
+      /* ignore */
+    }
+    const e = new Error(err.error || `HTTP ${res.status}`);
+    (e as Error & { status?: number }).status = res.status;
+    throw e;
+  }
+  return (await res.json()) as T;
+}
+
 export async function createRoom(input: CreateRoomRequest): Promise<CreateRoomResponse> {
   const res = await fetch('/api/rooms', {
     method: 'POST',
+    credentials: 'include',
     headers: { 'content-type': 'application/json' },
     body: JSON.stringify(input),
   });
-  if (!res.ok) {
-    const err = (await res.json()) as ApiError;
-    throw new Error(err.error || '创建失败');
-  }
-  return (await res.json()) as CreateRoomResponse;
+  return jsonOrThrow<CreateRoomResponse>(res);
+}
+
+export async function fetchRoom(roomId: string): Promise<Room> {
+  const res = await fetch(`/api/rooms/${roomId}`, { credentials: 'include' });
+  return jsonOrThrow<Room>(res);
+}
+
+export async function fetchMyVote(roomId: string): Promise<{ selected: number[] }> {
+  const res = await fetch(`/api/rooms/${roomId}/my-vote`, { credentials: 'include' });
+  return jsonOrThrow<{ selected: number[] }>(res);
+}
+
+export async function submitVote(
+  roomId: string,
+  optionIds: number[],
+): Promise<{ ok: true; selected: number[] }> {
+  const res = await fetch(`/api/rooms/${roomId}/votes`, {
+    method: 'POST',
+    credentials: 'include',
+    headers: { 'content-type': 'application/json' },
+    body: JSON.stringify({ option_ids: optionIds }),
+  });
+  return jsonOrThrow<{ ok: true; selected: number[] }>(res);
 }
