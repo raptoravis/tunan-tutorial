@@ -3,7 +3,7 @@ id: REQ-001
 title: 轻量投票系统（出游/午餐等开放议题）
 owner: raptoravis
 kind: feature
-status: in_progress
+status: done
 created: 2026-05-13
 updated: 2026-05-13
 source_id:

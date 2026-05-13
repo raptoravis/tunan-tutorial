@@ -2,7 +2,7 @@
 id: STORY-005
 title: 发起人凭管理 token 关闭房间或删除候选项
 owner: raptoravis
-status: ready
+status: done
 created: 2026-05-13
 updated: 2026-05-13
 source_id: PRD-001

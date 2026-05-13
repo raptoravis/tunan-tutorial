@@ -2,7 +2,7 @@
 id: PLAN-005
 title: 房间管理 — 实现计划
 owner: raptoravis
-status: ready
+status: done
 created: 2026-05-13
 updated: 2026-05-13
 source_id: STORY-005

@@ -2,7 +2,9 @@
 id: PR-005
 title: STORY-005 房间管理
 owner: raptoravis
-status: sponsor_wait
+status: merged
+merged_at: 2026-05-13T00:00:00Z
+merge_strategy: merge
 last_review: pass
 last_test: pass
 sponsor_approved: true
