@@ -14,17 +14,27 @@ export function PollPage({ id }: Props) {
 
   useEffect(() => {
     let cancelled = false;
-    getPoll(id)
-      .then((p) => {
-        if (cancelled) return;
-        setPoll(p);
-        setSelected(p.your_option_id);
-      })
-      .catch((e) => {
-        if (!cancelled) setError(e instanceof Error ? e.message : '加载失败');
-      });
+    let timer: ReturnType<typeof setInterval> | null = null;
+
+    const tick = (initial: boolean) => {
+      getPoll(id)
+        .then((p) => {
+          if (cancelled) return;
+          setPoll(p);
+          if (initial) setSelected(p.your_option_id);
+        })
+        .catch((e) => {
+          if (cancelled) return;
+          if (initial) setError(e instanceof Error ? e.message : '加载失败');
+        });
+    };
+
+    tick(true);
+    timer = setInterval(() => tick(false), 3000);
+
     return () => {
       cancelled = true;
+      if (timer) clearInterval(timer);
     };
   }, [id]);
 
@@ -76,39 +86,69 @@ export function PollPage({ id }: Props) {
 
       <form onSubmit={onSubmit} aria-label="vote-form">
         <ul aria-label="poll-options" style={{ listStyle: 'none', padding: 0 }}>
-          {poll.options.map((o) => (
-            <li key={o.id} style={{ marginBottom: 6 }}>
-              <label
-                style={{
-                  display: 'flex',
-                  gap: 8,
-                  padding: 8,
-                  border: '1px solid',
-                  borderColor: selected === o.id ? '#0a7' : '#ccc',
-                  borderRadius: 4,
-                  cursor: poll.closed ? 'not-allowed' : 'pointer',
-                  background: poll.your_option_id === o.id ? '#eafaf1' : 'transparent',
-                }}
-              >
-                <input
-                  type="radio"
-                  name="option"
-                  value={o.id}
-                  checked={selected === o.id}
-                  onChange={() => setSelected(o.id)}
-                  disabled={poll.closed}
-                  aria-label={`vote-${o.id}`}
-                />
-                <span>{o.label}</span>
-                {poll.your_option_id === o.id && (
-                  <span aria-label="your-choice" style={{ color: '#0a7', fontSize: 12 }}>
-                    （你的选择）
-                  </span>
-                )}
-              </label>
-            </li>
-          ))}
+          {poll.options.map((o) => {
+            const tally = poll.tallies.find((t) => t.option_id === o.id);
+            const count = tally?.count ?? 0;
+            const percent = tally?.percent ?? 0;
+            return (
+              <li key={o.id} style={{ marginBottom: 6 }}>
+                <label
+                  style={{
+                    display: 'block',
+                    padding: 8,
+                    border: '1px solid',
+                    borderColor: selected === o.id ? '#0a7' : '#ccc',
+                    borderRadius: 4,
+                    cursor: poll.closed ? 'not-allowed' : 'pointer',
+                    background: poll.your_option_id === o.id ? '#eafaf1' : 'transparent',
+                  }}
+                >
+                  <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+                    <input
+                      type="radio"
+                      name="option"
+                      value={o.id}
+                      checked={selected === o.id}
+                      onChange={() => setSelected(o.id)}
+                      disabled={poll.closed}
+                      aria-label={`vote-${o.id}`}
+                    />
+                    <span style={{ flex: 1 }}>{o.label}</span>
+                    <span aria-label={`tally-${o.id}`} style={{ color: '#444', fontSize: 13 }}>
+                      {count} 票 · {percent.toFixed(1)}%
+                    </span>
+                    {poll.your_option_id === o.id && (
+                      <span aria-label="your-choice" style={{ color: '#0a7', fontSize: 12 }}>
+                        ✓
+                      </span>
+                    )}
+                  </div>
+                  <div
+                    style={{
+                      marginTop: 6,
+                      height: 6,
+                      background: '#eee',
+                      borderRadius: 3,
+                      overflow: 'hidden',
+                    }}
+                  >
+                    <div
+                      style={{
+                        width: `${percent}%`,
+                        height: '100%',
+                        background: '#0a7',
+                        transition: 'width 0.4s ease',
+                      }}
+                    />
+                  </div>
+                </label>
+              </li>
+            );
+          })}
         </ul>
+        <p aria-label="total-votes" style={{ color: '#666', fontSize: 13 }}>
+          {poll.total_votes === 0 ? '暂无投票' : `共 ${poll.total_votes} 票`}
+        </p>
         {formError && (
           <p role="alert" style={{ color: 'crimson' }}>
             {formError}

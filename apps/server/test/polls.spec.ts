@@ -268,3 +268,84 @@ describe('POST /api/polls/:id/votes', () => {
     expect(res.status).toBe(400);
   });
 });
+
+async function castVote(app: ReturnType<typeof createApp>, pollId: string, optionId: string, cookie?: string) {
+  return app.request(`/api/polls/${pollId}/votes`, {
+    method: 'POST',
+    headers: { 'content-type': 'application/json', ...(cookie ? { cookie } : {}) },
+    body: JSON.stringify({ option_id: optionId }),
+  });
+}
+
+function extractCookie(res: Response, name: string): string {
+  const sc = res.headers.get('set-cookie') ?? '';
+  return (
+    sc
+      .split(',')
+      .find((c) => c.includes(`${name}=`))
+      ?.split(';')[0] ?? ''
+  );
+}
+
+describe('GET /api/polls/:id tallies', () => {
+  beforeEach(() => resetDb());
+
+  it('T-R01 no votes → tallies all zero', async () => {
+    const app = createApp();
+    const { id } = await createPoll(app, { title: 't', options: ['a', 'b'] });
+    const view = await app.request(`/api/polls/${id}`);
+    const body = await view.json();
+    expect(body.total_votes).toBe(0);
+    expect(body.tallies.map((t: { count: number }) => t.count)).toEqual([0, 0]);
+    expect(body.tallies.map((t: { percent: number }) => t.percent)).toEqual([0, 0]);
+  });
+
+  it('T-R02 2/1 distribution → 66.7 / 33.3', async () => {
+    const app = createApp();
+    const { id } = await createPoll(app, { title: 't', options: ['a', 'b'] });
+    const opts = await getOptions(app, id);
+
+    const v1 = await castVote(app, id, opts[0].id);
+    const v2 = await castVote(app, id, opts[0].id, extractCookie(v1, 'voter_id').replace(/voter_id=.+/, 'voter_id=v2'));
+    const v3 = await castVote(app, id, opts[1].id, 'voter_id=v3');
+
+    const view = await app.request(`/api/polls/${id}`);
+    const body = await view.json();
+    expect(body.total_votes).toBe(3);
+    const ta = body.tallies.find((t: { option_id: string }) => t.option_id === opts[0].id);
+    const tb = body.tallies.find((t: { option_id: string }) => t.option_id === opts[1].id);
+    expect(ta.count).toBe(2);
+    expect(tb.count).toBe(1);
+    expect(ta.percent).toBeCloseTo(66.7, 0);
+    expect(tb.percent).toBeCloseTo(33.3, 0);
+  });
+
+  it('T-R03 vote change subtracts old + adds new', async () => {
+    const app = createApp();
+    const { id } = await createPoll(app, { title: 't', options: ['a', 'b'] });
+    const opts = await getOptions(app, id);
+
+    const v1 = await castVote(app, id, opts[0].id);
+    const cookie = extractCookie(v1, 'voter_id');
+    await castVote(app, id, opts[1].id, cookie);
+
+    const view = await app.request(`/api/polls/${id}`);
+    const body = await view.json();
+    expect(body.total_votes).toBe(1);
+    const ta = body.tallies.find((t: { option_id: string }) => t.option_id === opts[0].id);
+    const tb = body.tallies.find((t: { option_id: string }) => t.option_id === opts[1].id);
+    expect(ta.count).toBe(0);
+    expect(tb.count).toBe(1);
+  });
+
+  it('T-R04 tallies ordered by option position', async () => {
+    const app = createApp();
+    const { id } = await createPoll(app, { title: 't', options: ['x', 'y', 'z'] });
+    const view = await app.request(`/api/polls/${id}`);
+    const body = await view.json();
+    expect(body.tallies.length).toBe(3);
+    expect(body.options.map((o: { id: string }) => o.id)).toEqual(
+      body.tallies.map((t: { option_id: string }) => t.option_id),
+    );
+  });
+});
