@@ -2,7 +2,7 @@
 id: STORY-002
 title: 参与者能匿名进入房间多选投票并修改
 owner: raptoravis
-status: ready
+status: done
 created: 2026-05-13
 updated: 2026-05-13
 source_id: PRD-001

@@ -2,7 +2,7 @@
 id: PLAN-002
 title: 参与投票（多选 + 修改）— 实现计划
 owner: raptoravis
-status: ready
+status: done
 created: 2026-05-13
 updated: 2026-05-13
 source_id: STORY-002
