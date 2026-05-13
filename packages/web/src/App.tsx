@@ -42,17 +42,41 @@ export function App() {
       <main>
         {route.name === "home" && (
           <div className="home">
-            <p>轻量群体投票工具。</p>
+            <p>轻量群体投票工具。从模板快速开始，或自定义创建。</p>
+            <div className="template-grid">
+              <a
+                href="/new?template=travel"
+                className="template-card"
+                onClick={(e) => {
+                  e.preventDefault();
+                  navigate("/new?template=travel");
+                }}
+              >
+                <strong>去哪旅游</strong>
+                <small>周末目的地</small>
+              </a>
+              <a
+                href="/new?template=lunch"
+                className="template-card"
+                onClick={(e) => {
+                  e.preventDefault();
+                  navigate("/new?template=lunch");
+                }}
+              >
+                <strong>中饭吃什么</strong>
+                <small>同事午餐</small>
+              </a>
+            </div>
             <p>
               <a
                 href="/new"
-                className="btn primary"
+                className="btn"
                 onClick={(e) => {
                   e.preventDefault();
                   navigate("/new");
                 }}
               >
-                创建新投票
+                自定义创建
               </a>
             </p>
           </div>
