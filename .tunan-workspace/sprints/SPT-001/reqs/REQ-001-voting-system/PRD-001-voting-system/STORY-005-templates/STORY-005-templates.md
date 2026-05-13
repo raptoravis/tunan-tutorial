@@ -3,7 +3,7 @@ id: STORY-005
 title: 首页内置示例模板（旅游 / 午餐）
 owner: raptoravis
 source_id: PRD-001
-status: ready
+status: in_progress
 created: 2026-05-13
 updated: 2026-05-13
 priority: P2
