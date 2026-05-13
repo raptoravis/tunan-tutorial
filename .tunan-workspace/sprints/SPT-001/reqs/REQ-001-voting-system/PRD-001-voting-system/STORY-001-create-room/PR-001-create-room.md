@@ -2,7 +2,9 @@
 id: PR-001
 title: STORY-001 创建投票房间端到端
 owner: raptoravis
-status: sponsor_wait
+status: merged
+merged_at: 2026-05-13T00:00:00Z
+merge_strategy: merge
 created: 2026-05-13
 updated: 2026-05-13
 source_id: TESTPLAN-001
