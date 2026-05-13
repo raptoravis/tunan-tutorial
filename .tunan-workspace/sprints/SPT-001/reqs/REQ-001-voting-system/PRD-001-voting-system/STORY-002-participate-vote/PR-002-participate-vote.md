@@ -2,7 +2,12 @@
 id: PR-002
 title: STORY-002 参与投票（多选+修改）
 owner: raptoravis
-status: reviewing
+status: sponsor_wait
+last_review: pass
+last_test: pass
+sponsor_approved: true
+sponsor_approved_by: pre_auth
+sponsor_approved_at: 2026-05-13T00:00:00Z
 created: 2026-05-13
 updated: 2026-05-13
 source_id: TESTPLAN-002
