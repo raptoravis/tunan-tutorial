@@ -2,7 +2,7 @@
 id: STORY-003
 title: 实时结果展示（票数 + 百分比 + 自动刷新）
 owner: raptoravis
-status: ready
+status: in_progress
 created: 2026-05-13
 updated: 2026-05-13
 source_id: PRD-001
