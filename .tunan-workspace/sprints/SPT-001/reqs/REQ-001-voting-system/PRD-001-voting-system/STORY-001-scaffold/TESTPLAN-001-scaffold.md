@@ -3,7 +3,7 @@ id: TESTPLAN-001
 title: 项目脚手架测试计划
 owner: raptoravis
 source_id: PLAN-001
-status: ready
+status: implemented
 created: 2026-05-13
 updated: 2026-05-13
 priority: P2
