@@ -3,7 +3,7 @@ id: STORY-001
 title: 起项目脚手架（前后端 walking skeleton）
 owner: raptoravis
 source_id: PRD-001
-status: ready
+status: done
 created: 2026-05-13
 updated: 2026-05-13
 priority: P2

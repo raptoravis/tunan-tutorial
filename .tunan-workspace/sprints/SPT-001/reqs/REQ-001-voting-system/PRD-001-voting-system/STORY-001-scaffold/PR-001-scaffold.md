@@ -3,7 +3,7 @@ id: PR-001
 title: STORY-001 项目脚手架 PR
 owner: raptoravis
 source_id: TESTPLAN-001
-status: reviewing
+status: merged
 created: 2026-05-13
 updated: 2026-05-13
 gh_pr: 12
