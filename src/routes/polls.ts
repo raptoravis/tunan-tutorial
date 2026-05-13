@@ -156,6 +156,21 @@ export function pollsRoutes(db: DB) {
     });
   });
 
+  r.post('/api/polls/:id/close', (c) => {
+    const id = c.req.param('id');
+    const token = c.req.query('token');
+    if (!token) return c.json({ error: 'missing_token' }, 401);
+    const poll = db
+      .prepare(`SELECT id, admin_token, closed_at_ms FROM polls WHERE id = ?`)
+      .get(id) as { id: string; admin_token: string; closed_at_ms: number | null } | undefined;
+    if (!poll) return c.json({ error: 'poll_not_found' }, 404);
+    if (poll.admin_token !== token) return c.json({ error: 'forbidden' }, 401);
+    if (poll.closed_at_ms !== null) return c.json({ closed_at_ms: poll.closed_at_ms });
+    const now = Date.now();
+    db.prepare(`UPDATE polls SET closed_at_ms = ? WHERE id = ?`).run(now, id);
+    return c.json({ closed_at_ms: now });
+  });
+
   r.get('/v/:id', (c) => {
     const id = c.req.param('id');
     const poll = db

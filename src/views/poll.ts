@@ -15,9 +15,10 @@ export function renderPollPage(p: PollViewData): string {
   const isAdmin = !!p.adminToken;
   const closed = !!p.closed;
   const adminBanner = isAdmin
-    ? `<p class="meta" style="background:#fef3c7;padding:.5rem .75rem;border-radius:8px">
-        🔑 这是管理链接，请勿分享。参与链接：<a href="/v/${escapeHtml(p.id)}">/v/${escapeHtml(p.id)}</a>
-      </p>`
+    ? `<div class="meta" style="background:#fef3c7;padding:.5rem .75rem;border-radius:8px;display:flex;flex-direction:column;gap:.5rem">
+        <span>🔑 这是管理链接，请勿分享。参与链接：<a href="/v/${escapeHtml(p.id)}">/v/${escapeHtml(p.id)}</a></span>
+        ${closed ? '' : `<button type="button" id="close-poll-btn" data-token="${escapeHtml(p.adminToken!)}" data-poll-id="${escapeHtml(p.id)}" style="align-self:flex-start;background:#dc2626;color:#fff;border:0;padding:.5rem .75rem;border-radius:6px;min-height:36px;cursor:pointer">提前关闭投票</button>`}
+      </div>`
     : '';
   const statusBanner = closed
     ? `<p class="meta" style="background:#fee2e2;padding:.5rem .75rem;border-radius:8px">⛔ 投票已结束（只读）</p>`
@@ -115,6 +116,19 @@ export function renderPollPage(p: PollViewData): string {
       }
       refreshResults();
       if (!POLL_CLOSED) pollTimer = setInterval(refreshResults, 5000);
+
+      const closeBtn = document.getElementById('close-poll-btn');
+      if (closeBtn) {
+        closeBtn.addEventListener('click', async () => {
+          if (!confirm('提前关闭后将无法再投票，确认？')) return;
+          const token = closeBtn.dataset.token;
+          const id = closeBtn.dataset.pollId;
+          const r = await fetch('/api/polls/' + id + '/close?token=' + encodeURIComponent(token), {
+            method: 'POST', credentials: 'same-origin',
+          });
+          if (r.ok) location.reload();
+        });
+      }
     </script>
     `,
   );
