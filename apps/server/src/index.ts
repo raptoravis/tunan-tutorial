@@ -1,6 +1,9 @@
 import { Hono } from 'hono';
 import { serve } from '@hono/node-server';
-import { db } from './db.js';
+import { db, ensureSchema } from './db.js';
+import { votesRouter } from './routes/votes.js';
+
+ensureSchema();
 
 export const app = new Hono();
 
@@ -14,6 +17,8 @@ app.get('/api/health', (c) => {
   }
   return c.json({ ok: true, db: dbStatus });
 });
+
+app.route('/api/votes', votesRouter);
 
 const isEntry =
   import.meta.url === `file://${process.argv[1]}` ||
