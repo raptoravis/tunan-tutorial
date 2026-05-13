@@ -73,6 +73,8 @@ export function Created() {
       </section>
 
       <p>
+        <Link to={`/r/${id}/admin?token=${encodeURIComponent(token)}`}>前往管理面板</Link>
+        {' · '}
         <Link to="/">再建一个</Link>
       </p>
     </main>

@@ -119,3 +119,8 @@ fieldset[disabled] { opacity: 0.6; }
 
 .add-option { display: flex; gap: 8px; align-items: center; margin: 16px 0; flex-wrap: wrap; }
 .add-option input[type="text"] { flex: 1; min-width: 0; }
+
+.admin { margin: 16px 0; }
+.admin input[type="password"] { width: 100%; padding: 8px 10px; border: 1px solid var(--border); border-radius: 4px; }
+.admin h2 { margin-top: 16px; }
+.admin .options li { display: flex; justify-content: space-between; align-items: center; padding: 6px 0; border-bottom: 1px solid var(--border); }
