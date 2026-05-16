@@ -1,4 +1,4 @@
-﻿# check-windows.ps1
+﻿# check-tunan-windows.ps1
 # tunan environment verifier (Windows / PowerShell) -- READ-ONLY.
 # Verifies prerequisites + .claude/skills/ + workspace + MCPs.
 # Does NOT install or copy anything. Run inside the target project.
@@ -7,8 +7,8 @@
 # Keep the expected dir/file list below in sync with that section.
 #
 # Usage:
-#   ./check-windows.ps1                              # check current directory
-#   ./check-windows.ps1 -TargetPath D:\dev\my-proj   # check specified project
+#   ./check-tunan-windows.ps1                              # check current directory
+#   ./check-tunan-windows.ps1 -TargetPath D:\dev\my-proj   # check specified project
 
 [CmdletBinding()]
 param(
@@ -172,7 +172,7 @@ if (-not (Test-Path $workspaceRoot)) {
     Fail ".tunan-workspace\ missing."
 } else {
     Write-Ok ".tunan-workspace\ present."
-    foreach ($d in @("worktrees", "retro", "raw-reqs", "sprints")) {
+    foreach ($d in @("worktrees", "retro", "raws", "sprints")) {
         if (Test-Path (Join-Path $workspaceRoot $d)) {
             Write-Ok ".tunan-workspace\$d present."
         } else {
@@ -203,11 +203,11 @@ if (-not (Test-Path $workspaceRoot)) {
             } else {
                 Fail ".tunan-workspace\sprints\$currentSprint\reqs\ missing (current sprint pool root)."
             }
-            $rawSprint = Join-Path $workspaceRoot "raw-reqs\$currentSprint"
+            $rawSprint = Join-Path $workspaceRoot "raws\$currentSprint"
             if (Test-Path $rawSprint) {
-                Write-Ok ".tunan-workspace\raw-reqs\$currentSprint\ present."
+                Write-Ok ".tunan-workspace\raws\$currentSprint\ present."
             } else {
-                Fail ".tunan-workspace\raw-reqs\$currentSprint\ missing (raw-req inbox for current sprint; mirror of sprints\<current>\reqs\)."
+                Fail ".tunan-workspace\raws\$currentSprint\ missing (raw-req inbox for current sprint; mirror of sprints\<current>\reqs\)."
             }
         }
     }
