@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# check.sh
+# check-tunan.sh
 # tunan environment verifier (macOS / Linux / bash) -- READ-ONLY.
 # Verifies prerequisites + .claude/skills/ + workspace + MCPs.
 # Does NOT install or copy anything. Run inside the target project.
@@ -8,8 +8,8 @@
 # Keep the expected dir/file list below in sync with that section.
 #
 # Usage:
-#   ./check.sh                       # check current directory
-#   ./check.sh /path/to/my-proj      # check specified project
+#   ./check-tunan.sh                       # check current directory
+#   ./check-tunan.sh /path/to/my-proj      # check specified project
 
 set -uo pipefail
 
@@ -163,7 +163,7 @@ if [ ! -d "$WORKSPACE_ROOT" ]; then
     fail ".tunan-workspace/ missing."
 else
     ok ".tunan-workspace/ present."
-    for d in worktrees retro raw-reqs sprints; do
+    for d in worktrees retro raws sprints; do
         if [ -d "$WORKSPACE_ROOT/$d" ]; then
             ok ".tunan-workspace/$d present."
         else
@@ -191,10 +191,10 @@ else
             else
                 fail ".tunan-workspace/sprints/$CURRENT_SPRINT/reqs/ missing (current sprint pool root)."
             fi
-            if [ -d "$WORKSPACE_ROOT/raw-reqs/$CURRENT_SPRINT" ]; then
-                ok ".tunan-workspace/raw-reqs/$CURRENT_SPRINT/ present."
+            if [ -d "$WORKSPACE_ROOT/raws/$CURRENT_SPRINT" ]; then
+                ok ".tunan-workspace/raws/$CURRENT_SPRINT/ present."
             else
-                fail ".tunan-workspace/raw-reqs/$CURRENT_SPRINT/ missing (raw-req inbox for current sprint; mirror of sprints/<current>/reqs/)."
+                fail ".tunan-workspace/raws/$CURRENT_SPRINT/ missing (raw-req inbox for current sprint; mirror of sprints/<current>/reqs/)."
             fi
         fi
     fi
