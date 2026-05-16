@@ -155,7 +155,7 @@ if ($presentRoots.Count -eq 0) {
     }
 }
 
-foreach ($f in @("USER.md", "tutorials")) {
+foreach ($f in @("USER.md", "tunan-tutorials")) {
     if (Test-Path (Join-Path $TargetPath $f)) {
         Write-Ok "$f present."
     } else {
@@ -207,7 +207,7 @@ if (-not (Test-Path $workspaceRoot)) {
             if (Test-Path $rawSprint) {
                 Write-Ok ".tunan-workspace\raws\$currentSprint\ present."
             } else {
-                Fail ".tunan-workspace\raws\$currentSprint\ missing (raw-req inbox for current sprint; mirror of sprints\<current>\reqs\)."
+                Fail ".tunan-workspace\raws\$currentSprint\ missing (raw inbox for current sprint; mirror of sprints\<current>\reqs\)."
             }
         }
     }

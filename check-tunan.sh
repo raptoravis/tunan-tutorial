@@ -146,7 +146,7 @@ else
     fi
 fi
 
-for f in USER.md tutorials; do
+for f in USER.md tunan-tutorials; do
     if [ -e "$TARGET_PATH/$f" ]; then
         ok "$f present."
     else
@@ -194,7 +194,7 @@ else
             if [ -d "$WORKSPACE_ROOT/raws/$CURRENT_SPRINT" ]; then
                 ok ".tunan-workspace/raws/$CURRENT_SPRINT/ present."
             else
-                fail ".tunan-workspace/raws/$CURRENT_SPRINT/ missing (raw-req inbox for current sprint; mirror of sprints/<current>/reqs/)."
+                fail ".tunan-workspace/raws/$CURRENT_SPRINT/ missing (raw inbox for current sprint; mirror of sprints/<current>/reqs/)."
             fi
         fi
     fi
